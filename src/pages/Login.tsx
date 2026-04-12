@@ -3,14 +3,17 @@ import { Link, useNavigate } from 'react-router-dom';
 import { auth } from '../lib/firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { AnimatedBackground } from '../components/AnimatedBackground';
-import { Atom, Mail, Lock, ArrowRight, Loader2 } from 'lucide-react';
+import { Atom, Mail, Lock, ArrowRight, Loader2, UserCircle2 } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 
 export function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [guestLoading, setGuestLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { loginAsGuest } = useAuth();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,6 +27,19 @@ export function Login() {
       setError('E-posta veya şifre hatalı.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGuestLogin = async () => {
+    setGuestLoading(true);
+    setError('');
+    try {
+      await loginAsGuest();
+      navigate('/dashboard');
+    } catch (err: any) {
+      setError('Misafir girişi başarısız oldu.');
+    } finally {
+      setGuestLoading(false);
     }
   };
 
@@ -84,7 +100,7 @@ export function Login() {
 
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || guestLoading}
               className="w-full flex items-center justify-center gap-2 py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500 focus:ring-offset-slate-900 transition-all disabled:opacity-50 disabled:cursor-not-allowed mt-6"
             >
               {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
@@ -94,6 +110,27 @@ export function Login() {
               )}
             </button>
           </form>
+
+          <div className="mt-6 relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-slate-700"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-slate-900 text-slate-400">veya</span>
+            </div>
+          </div>
+
+          <button
+            onClick={handleGuestLogin}
+            disabled={loading || guestLoading}
+            className="w-full flex items-center justify-center gap-2 py-3 px-4 border border-slate-700 rounded-xl shadow-sm text-sm font-medium text-slate-300 bg-slate-800 hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500 focus:ring-offset-slate-900 transition-all disabled:opacity-50 disabled:cursor-not-allowed mt-6"
+          >
+            {guestLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
+              <>
+                <UserCircle2 className="w-5 h-5" /> Misafir Olarak Devam Et
+              </>
+            )}
+          </button>
 
           <div className="mt-6 text-center">
             <p className="text-sm text-slate-400">

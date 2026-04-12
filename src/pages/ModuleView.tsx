@@ -3,14 +3,18 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useCurriculum } from '../contexts/CurriculumContext';
 import { motion } from 'motion/react';
-import { CheckCircle2, ArrowLeft, Zap, Trophy, PlayCircle } from 'lucide-react';
+import { CheckCircle2, ArrowLeft, Trophy } from 'lucide-react';
 import { MoleculeViewer } from '../components/MoleculeViewer';
 import { MatchingGame } from '../components/MatchingGame';
+import { MindmapActivity } from '../components/MindmapActivity';
+import { Leaderboard } from '../components/Leaderboard';
+import { ReactionGame } from '../components/ReactionGame';
+import { ClassificationGame } from '../components/ClassificationGame';
 
 export function ModuleView() {
   const { moduleId } = useParams();
   const navigate = useNavigate();
-  const { userProfile, completeModule, awardBadge } = useAuth();
+  const { userProfile, completeModule, awardBadge, submitScore } = useAuth();
   const { themes: curriculum, loading } = useCurriculum();
   
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -19,10 +23,14 @@ export function ModuleView() {
   const [showResult, setShowResult] = useState(false);
   const [completed, setCompleted] = useState(false);
   
-  // Dynamic XP tracking
-  const [earnedXp, setEarnedXp] = useState(0);
   const [quizFinished, setQuizFinished] = useState(false);
   const [matchingFinished, setMatchingFinished] = useState(false);
+  const [mindmapFinished, setMindmapFinished] = useState(false);
+  const [reactionFinished, setReactionFinished] = useState(false);
+  const [classificationFinished, setClassificationFinished] = useState(false);
+
+  const [correctAnswers, setCorrectAnswers] = useState(0);
+  const [scoreSubmitted, setScoreSubmitted] = useState(false);
 
   if (loading) return <div className="text-center py-20 text-slate-400">Yükleniyor...</div>;
 
@@ -71,9 +79,12 @@ export function ModuleView() {
     const correct = index === moduleData.questions![currentQuestion].answer;
     setIsCorrect(correct);
     setShowResult(true);
+    if (correct) {
+      setCorrectAnswers(prev => prev + 1);
+    }
   };
 
-  const nextQuestion = () => {
+  const nextQuestion = async () => {
     if (currentQuestion < moduleData.questions!.length - 1) {
       setCurrentQuestion(currentQuestion + 1);
       setSelectedAnswer(null);
@@ -81,11 +92,44 @@ export function ModuleView() {
       setShowResult(false);
     } else {
       setQuizFinished(true);
+      if (!scoreSubmitted) {
+        const finalScore = Math.round((correctAnswers / moduleData.questions!.length) * 1000);
+        await submitScore(moduleData!.id, finalScore);
+        setScoreSubmitted(true);
+      }
     }
   };
 
-  const handleMatchingComplete = () => {
+  const handleMatchingComplete = async (score: number) => {
     setMatchingFinished(true);
+    if (!scoreSubmitted) {
+      await submitScore(moduleData!.id, score);
+      setScoreSubmitted(true);
+    }
+  };
+
+  const handleMindmapComplete = async (score: number) => {
+    setMindmapFinished(true);
+    if (!scoreSubmitted) {
+      await submitScore(moduleData!.id, score);
+      setScoreSubmitted(true);
+    }
+  };
+
+  const handleReactionComplete = async (score: number) => {
+    setReactionFinished(true);
+    if (!scoreSubmitted) {
+      await submitScore(moduleData!.id, score);
+      setScoreSubmitted(true);
+    }
+  };
+
+  const handleClassificationComplete = async (score: number) => {
+    setClassificationFinished(true);
+    if (!scoreSubmitted) {
+      await submitScore(moduleData!.id, score);
+      setScoreSubmitted(true);
+    }
   };
 
   return (
@@ -119,6 +163,66 @@ export function ModuleView() {
         animate={{ opacity: 1, y: 0 }}
         className="glass-card p-8 border-cyan-500/20"
       >
+        {/* CLASSIFICATION GAME TYPE */}
+        {moduleData.type === 'classification' && moduleData.classifications && (
+          <div className="space-y-8">
+            {!classificationFinished ? (
+              <ClassificationGame data={moduleData.classifications[0]} onComplete={handleClassificationComplete} />
+            ) : (
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="text-center py-8"
+              >
+                <Trophy className="w-16 h-16 text-amber-400 mx-auto mb-4" />
+                <h2 className="text-2xl font-bold text-white mb-2">Sınıflandırma Tamamlandı!</h2>
+                
+                <div className="mb-8 text-left">
+                  <Leaderboard moduleId={moduleData.id} />
+                </div>
+
+                <button 
+                  onClick={() => handleComplete()}
+                  className="px-8 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-medium transition-colors shadow-[0_0_15px_rgba(6,182,212,0.3)] inline-flex items-center gap-2 mt-8"
+                >
+                  {completed ? 'Haritaya Dön' : 'Devam Et'}
+                  <ArrowLeft className="w-5 h-5 rotate-180" />
+                </button>
+              </motion.div>
+            )}
+          </div>
+        )}
+
+        {/* REACTION GAME TYPE */}
+        {moduleData.type === 'reaction' && moduleData.reactions && (
+          <div className="space-y-8">
+            {!reactionFinished ? (
+              <ReactionGame reactions={moduleData.reactions} onComplete={handleReactionComplete} />
+            ) : (
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="text-center py-8"
+              >
+                <Trophy className="w-16 h-16 text-amber-400 mx-auto mb-4" />
+                <h2 className="text-2xl font-bold text-white mb-2">Laboratuvar Tamamlandı!</h2>
+                
+                <div className="mb-8 text-left">
+                  <Leaderboard moduleId={moduleData.id} />
+                </div>
+
+                <button 
+                  onClick={() => handleComplete()}
+                  className="px-8 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-medium transition-colors shadow-[0_0_15px_rgba(6,182,212,0.3)] inline-flex items-center gap-2 mt-8"
+                >
+                  {completed ? 'Haritaya Dön' : 'Devam Et'}
+                  <ArrowLeft className="w-5 h-5 rotate-180" />
+                </button>
+              </motion.div>
+            )}
+          </div>
+        )}
+
         {/* LESSON TYPE */}
         {moduleData.type === 'lesson' && (
           <div className="space-y-8">
@@ -238,15 +342,48 @@ export function ModuleView() {
               <motion.div 
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="pt-8 border-t border-white/10 flex justify-end items-center"
+                className="pt-8 border-t border-white/10"
               >
-                <button 
-                  onClick={() => handleComplete()}
-                  className="px-8 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-medium transition-colors shadow-[0_0_15px_rgba(6,182,212,0.3)] flex items-center gap-2"
-                >
-                  {completed ? 'Haritaya Dön' : 'Devam Et'}
-                  <ArrowLeft className="w-5 h-5 rotate-180" />
-                </button>
+                <div className="mb-8">
+                  <Leaderboard moduleId={moduleData.id} />
+                </div>
+                <div className="flex justify-end items-center">
+                  <button 
+                    onClick={() => handleComplete()}
+                    className="px-8 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-medium transition-colors shadow-[0_0_15px_rgba(6,182,212,0.3)] flex items-center gap-2"
+                  >
+                    {completed ? 'Haritaya Dön' : 'Devam Et'}
+                    <ArrowLeft className="w-5 h-5 rotate-180" />
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </div>
+        )}
+
+        {/* MINDMAP TYPE */}
+        {moduleData.type === 'mindmap' && moduleData.mindmapNodes && (
+          <div className="space-y-8">
+            <MindmapActivity nodes={moduleData.mindmapNodes} onComplete={handleMindmapComplete} />
+            
+            {mindmapFinished && (
+              <motion.div 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="pt-8 border-t border-white/10"
+              >
+                <div className="mb-8">
+                  <Leaderboard moduleId={moduleData.id} />
+                </div>
+                <div className="flex justify-end items-center">
+                  <button 
+                    onClick={() => handleComplete()}
+                    className="px-8 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-medium transition-colors shadow-[0_0_15px_rgba(6,182,212,0.3)] flex items-center gap-2"
+                  >
+                    {completed ? 'Haritaya Dön' : 'Etkinliği Bitir'}
+                    <CheckCircle2 className="w-5 h-5" />
+                  </button>
+                </div>
               </motion.div>
             )}
           </div>
@@ -277,38 +414,90 @@ export function ModuleView() {
               </p>
             </div>
 
-            <div className="space-y-3 mb-8">
-              {moduleData.questions[currentQuestion].options.map((opt, idx) => {
-                let btnClass = "w-full text-left p-4 rounded-xl border transition-all ";
-                
-                if (!showResult) {
-                  btnClass += "border-slate-700 bg-slate-800/50 hover:bg-slate-700 hover:border-slate-600 text-slate-200";
-                } else {
-                  if (idx === moduleData.questions![currentQuestion].answer) {
-                    btnClass += "border-emerald-500 bg-emerald-500/20 text-emerald-400 font-medium";
-                  } else if (idx === selectedAnswer) {
-                    btnClass += "border-red-500 bg-red-500/20 text-red-400";
-                  } else {
-                    btnClass += "border-slate-800 bg-slate-900/50 text-slate-500 opacity-50";
-                  }
-                }
+            {moduleData.questions[currentQuestion].optionType === 'molecule' && (
+              <div className="mb-6 flex flex-wrap gap-4 justify-center bg-slate-900/50 p-4 rounded-xl border border-slate-800">
+                <div className="text-sm font-medium text-slate-400 w-full text-center mb-1">Atom Renkleri:</div>
+                <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-[#ffffff] shadow-[inset_0_-2px_4px_rgba(0,0,0,0.2)]"></div><span className="text-sm text-slate-300">Hidrojen (H)</span></div>
+                <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-[#222222] border border-slate-700 shadow-[inset_0_-2px_4px_rgba(0,0,0,0.5)]"></div><span className="text-sm text-slate-300">Karbon (C)</span></div>
+                <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-[#ff0000] shadow-[inset_0_-2px_4px_rgba(0,0,0,0.3)]"></div><span className="text-sm text-slate-300">Oksijen (O)</span></div>
+                <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-[#0000ff] shadow-[inset_0_-2px_4px_rgba(0,0,0,0.3)]"></div><span className="text-sm text-slate-300">Azot (N)</span></div>
+                <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-[#00ff00] shadow-[inset_0_-2px_4px_rgba(0,0,0,0.3)]"></div><span className="text-sm text-slate-300">Klor (Cl)</span></div>
+              </div>
+            )}
 
-                return (
-                  <button
-                    key={idx}
-                    onClick={() => handleAnswer(idx)}
-                    disabled={showResult}
-                    className={btnClass}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span>{opt}</span>
+            <div className={`grid gap-4 mb-8 ${moduleData.questions[currentQuestion].optionType === 'molecule' ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1'}`}>
+              {moduleData.questions[currentQuestion].optionType === 'molecule' ? (
+                moduleData.questions[currentQuestion].moleculeOptions?.map((optMolecule, idx) => {
+                  let btnClass = "w-full text-left p-4 rounded-xl border transition-all relative overflow-hidden ";
+                  
+                  if (!showResult) {
+                    btnClass += "border-slate-700 bg-slate-800/50 hover:bg-slate-700 hover:border-slate-600 text-slate-200";
+                  } else {
+                    if (idx === moduleData.questions![currentQuestion].answer) {
+                      btnClass += "border-emerald-500 bg-emerald-500/20 text-emerald-400 font-medium";
+                    } else if (idx === selectedAnswer) {
+                      btnClass += "border-red-500 bg-red-500/20 text-red-400";
+                    } else {
+                      btnClass += "border-slate-800 bg-slate-900/50 text-slate-500 opacity-50";
+                    }
+                  }
+
+                  return (
+                    <button
+                      key={idx}
+                      onClick={() => handleAnswer(idx)}
+                      disabled={showResult}
+                      className={btnClass}
+                    >
+                      <div className="h-48 w-full relative">
+                        <MoleculeViewer 
+                          model={optMolecule} 
+                          disableInteraction={true} 
+                          hideLabels={true} 
+                          className="absolute inset-0 w-full h-full"
+                        />
+                      </div>
                       {showResult && idx === moduleData.questions![currentQuestion].answer && (
-                        <CheckCircle2 className="w-5 h-5" />
+                        <div className="absolute top-4 right-4 bg-emerald-500 rounded-full p-1 text-white">
+                          <CheckCircle2 className="w-5 h-5" />
+                        </div>
                       )}
-                    </div>
-                  </button>
-                );
-              })}
+                    </button>
+                  );
+                })
+              ) : (
+                moduleData.questions[currentQuestion].options?.map((opt, idx) => {
+                  let btnClass = "w-full text-left p-4 rounded-xl border transition-all ";
+                  
+                  if (!showResult) {
+                    btnClass += "border-slate-700 bg-slate-800/50 hover:bg-slate-700 hover:border-slate-600 text-slate-200";
+                  } else {
+                    if (idx === moduleData.questions![currentQuestion].answer) {
+                      btnClass += "border-emerald-500 bg-emerald-500/20 text-emerald-400 font-medium";
+                    } else if (idx === selectedAnswer) {
+                      btnClass += "border-red-500 bg-red-500/20 text-red-400";
+                    } else {
+                      btnClass += "border-slate-800 bg-slate-900/50 text-slate-500 opacity-50";
+                    }
+                  }
+
+                  return (
+                    <button
+                      key={idx}
+                      onClick={() => handleAnswer(idx)}
+                      disabled={showResult}
+                      className={btnClass}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span>{opt}</span>
+                        {showResult && idx === moduleData.questions![currentQuestion].answer && (
+                          <CheckCircle2 className="w-5 h-5" />
+                        )}
+                      </div>
+                    </button>
+                  );
+                })
+              )}
             </div>
 
             {showResult && (
@@ -340,10 +529,15 @@ export function ModuleView() {
           >
             <Trophy className="w-16 h-16 text-amber-400 mx-auto mb-4" />
             <h2 className="text-2xl font-bold text-white mb-2">Test Tamamlandı!</h2>
+            <p className="text-slate-400 mb-8">Skorun: {Math.round((correctAnswers / moduleData.questions!.length) * 1000)} Puan</p>
             
+            <div className="mb-8 text-left">
+              <Leaderboard moduleId={moduleData.id} />
+            </div>
+
             <button 
               onClick={() => handleComplete()}
-              className="px-8 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-medium transition-colors shadow-[0_0_15px_rgba(6,182,212,0.3)] inline-flex items-center gap-2 mt-8"
+              className="px-8 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-medium transition-colors shadow-[0_0_15px_rgba(6,182,212,0.3)] inline-flex items-center gap-2"
             >
               {completed ? 'Haritaya Dön' : 'Devam Et'}
               <ArrowLeft className="w-5 h-5 rotate-180" />

@@ -1,236 +1,293 @@
-export interface Module {
-  id: string;
-  title: string;
-  description: string;
-  type: 'lesson' | 'quiz' | 'interactive' | 'matching';
-  content?: string;
-  questions?: {
-    q: string;
-    options: string[];
-    answer: number;
-  }[];
-  models?: {
-    name: string;
-    formula: string;
-    atoms: { element: string; position: [number, number, number] }[];
-    bonds: { start: [number, number, number]; end: [number, number, number] }[];
-  }[];
-  pairs?: {
-    left: string;
-    right: string;
-  }[];
-}
+import { Theme, Module, MoleculeData } from '../types/curriculum';
+import { molecules } from './molecules';
 
-export interface Theme {
-  id: string;
-  title: string;
-  description: string;
-  modules: Module[];
-}
+const moleculeList = Object.values(molecules);
+
+const generateMoleculeQuiz = () => {
+  return moleculeList.map((correctMol) => {
+    // Pick 3 random wrong molecules
+    const wrongMols = moleculeList
+      .filter(m => m.name !== correctMol.name)
+      .sort(() => 0.5 - Math.random())
+      .slice(0, 3);
+    
+    const options = [correctMol, ...wrongMols].sort(() => 0.5 - Math.random());
+    const answerIndex = options.findIndex(m => m.name === correctMol.name);
+
+    return {
+      id: `q_${correctMol.name}`,
+      q: `Aşağıdaki 3 boyutlu modellerden hangisi ${correctMol.name} (${correctMol.formula}) molekülüne aittir?`,
+      optionType: 'molecule' as const,
+      moleculeOptions: options,
+      answer: answerIndex
+    };
+  });
+};
 
 export const curriculum: Theme[] = [
   {
     id: "tema1",
     title: "1. TEMA: ETKİLEŞİM",
-    description: "Kimyasal değişimler, tepkimeler, mol kavramı ve gazların özellikleri.",
+    description: "Kimyasal değişimler ve göstergeleri.",
+    order: 1,
     modules: [
       {
         id: "t1_m1",
-        title: "Kimyasal Değişimlerin Kanıtları",
-        description: "Kimyasal değişimlerin gözlemlenebilir göstergelerini keşfet.",
-        type: "lesson",
-        content: "Maddenin iç yapısında meydana gelen değişimlere kimyasal değişim denir. Kimyasal değişimin gerçekleştiğini gösteren bazı kanıtlar vardır:\n\n1. **Renk Değişimi:** Bir elmanın kararması veya demirin paslanması.\n2. **Gaz Çıkışı:** Karbonata limon sıkıldığında köpürmesi.\n3. **Isı ve Işık Yayılması:** Odunun yanması.\n4. **Çökelek Oluşumu:** İki berrak çözelti karıştırıldığında katı bir maddenin dibe çökmesi.\n\nBu göstergeler, atomların yeniden düzenlenerek yeni maddeler oluşturduğunun kanıtıdır."
+        title: "Maddeyi Sınıflandır",
+        description: "Tanecik modellerine bakarak maddelerin element, bileşik veya karışım olduğuna karar verin.",
+        type: "classification",
+        classifications: [
+          {
+            id: "c1",
+            title: "Madde Sınıflandırma",
+            description: "Tanecik modellerini inceleyin.",
+            options: [
+              { id: 'element', label: 'Element', colorClass: 'hover:border-cyan-500 hover:text-cyan-400' },
+              { id: 'compound', label: 'Bileşik', colorClass: 'hover:border-emerald-500 hover:text-emerald-400' },
+              { id: 'mixture', label: 'Karışım', colorClass: 'hover:border-amber-500 hover:text-amber-400' }
+            ],
+            items: [
+              {
+                id: "i1",
+                molecule: molecules.h2o,
+                correctType: "compound",
+                explanation: "Farklı cins atomlar (H ve O) belirli oranda birleşerek yeni bir saf madde oluşturmuştur."
+              },
+              {
+                id: "i2",
+                molecule: molecules.n2,
+                correctType: "element",
+                explanation: "Aynı cins atomlardan (sadece Azot) oluşan saf maddedir."
+              },
+              {
+                id: "i3",
+                molecule: molecules.he,
+                correctType: "element",
+                explanation: "Aynı cins atomlardan oluşan tek atomlu (monatomik) elementtir."
+              },
+              {
+                id: "i4",
+                molecule: molecules.mixture_air,
+                correctType: "mixture",
+                explanation: "Farklı cins moleküller (N₂ ve O₂) kimyasal bağ kurmadan bir aradadır."
+              },
+              {
+                id: "i5",
+                molecule: molecules.co2,
+                correctType: "compound",
+                explanation: "Karbon ve Oksijen atomları kimyasal bağ ile birleşerek bileşik oluşturmuştur."
+              },
+              {
+                id: "i6",
+                molecule: molecules.mixture_salt_water,
+                correctType: "mixture",
+                explanation: "Su molekülleri ve tuz iyonları (Na⁺, Cl⁻) bir arada bulunur, kimyasal olarak birleşmemişlerdir."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        id: "t1_m1_2",
+        title: "Atom, Molekül, İyon",
+        description: "Tanecik modellerine bakarak maddenin atom, molekül veya iyon olduğuna karar verin.",
+        type: "classification",
+        classifications: [
+          {
+            id: "c2",
+            title: "Tanecik Türünü Belirle",
+            description: "Tanecik modellerini inceleyin.",
+            options: [
+              { id: 'atom', label: 'Atom', colorClass: 'hover:border-blue-500 hover:text-blue-400' },
+              { id: 'molecule', label: 'Molekül', colorClass: 'hover:border-purple-500 hover:text-purple-400' },
+              { id: 'ion', label: 'İyon', colorClass: 'hover:border-pink-500 hover:text-pink-400' }
+            ],
+            items: [
+              {
+                id: "i1",
+                molecule: molecules.atom_he,
+                correctType: "atom",
+                explanation: "Tek bir çekirdek etrafında bulunan elektronlardan oluşan, kimyasal bağ yapmamış tekil taneciktir."
+              },
+              {
+                id: "i2",
+                molecule: molecules.h2o,
+                correctType: "molecule",
+                explanation: "Birden fazla atomun kovalent bağ ile birleşerek oluşturduğu bağımsız tanecik grubudur."
+              },
+              {
+                id: "i3",
+                molecule: molecules.ion_na,
+                correctType: "ion",
+                explanation: "Elektron vermiş veya almış, elektrik yüklü taneciktir (Na⁺)."
+              },
+              {
+                id: "i4",
+                molecule: molecules.o2,
+                correctType: "molecule",
+                explanation: "Aynı cins iki atomun kovalent bağ ile birleştiği bir element molekülüdür."
+              },
+              {
+                id: "i5",
+                molecule: molecules.atom_c,
+                correctType: "atom",
+                explanation: "Tekil bir karbon atomudur."
+              },
+              {
+                id: "i6",
+                molecule: molecules.ion_cl,
+                correctType: "ion",
+                explanation: "Elektron alarak eksi (-) yükle yüklenmiş bir iyondur (Cl⁻)."
+              }
+            ]
+          }
+        ]
       },
       {
         id: "t1_m2",
-        title: "Kimyasal Değişimler Testi",
-        description: "Öğrendiklerini test et ve XP kazan.",
-        type: "quiz",
-        questions: [
+        title: "Kimyasal Değişimin Göstergeleri",
+        description: "Kimyasal değişimlerin göstergelerini keşfet ve soruları yanıtla.",
+        type: "mindmap",
+        mindmapNodes: [
           {
-            q: "Aşağıdakilerden hangisi kimyasal değişimin gözlemlenebilir bir göstergesi DEĞİLDİR?",
-            options: ["Gaz çıkışı", "Renk değişimi", "Hâl değişimi (Erime)", "Çökelek oluşumu"],
-            answer: 2
+            id: "renk",
+            label: "Renk değişimi",
+            color: "bg-red-500",
+            question: {
+              text: "Aşağıdaki olaylardan hangisi renk değişiminin kimyasal bir tepkimeye işaret ettiğine örnektir?",
+              options: [
+                { text: "Kesilen elmanın kararması", isCorrect: true, svgId: "apple_brown" },
+                { text: "Suya mürekkep damlatılması", isCorrect: false, svgId: "ink_water" }
+              ]
+            }
           },
           {
-            q: "İki sıvı karıştırıldığında kabın ısınması neyin göstergesidir?",
-            options: ["Fiziksel değişimin", "Enerji değişiminin (Kimyasal)", "Buharlaşmanın", "Donmanın"],
-            answer: 1
+            id: "gaz",
+            label: "Gaz çıkışı",
+            color: "bg-blue-500",
+            question: {
+              text: "Hangi görseldeki gaz çıkışı kimyasal bir değişimin sonucudur?",
+              options: [
+                { text: "Suyun kaynaması", isCorrect: false, svgId: "boiling_water" },
+                { text: "Karbonata limon sıkılması", isCorrect: true, svgId: "lemon_baking_soda" }
+              ]
+            }
           },
           {
-            q: "Aşağıdakilerden hangisi kimyasal bir değişimi kanıtlar niteliktedir?",
-            options: ["Buzun erimesi", "Tuzun suda çözünmesi", "Demirin paslanması", "Camın kırılması"],
-            answer: 2
+            id: "kati",
+            label: "Katı oluşumu",
+            color: "bg-orange-400",
+            question: {
+              text: "İki sıvı karıştırıldığında katı oluşumu (çökelme) kimyasal değişime kanıttır. Hangisi buna örnektir?",
+              options: [
+                { text: "Sütten peynir eldesi", isCorrect: true, svgId: "cheese_making" },
+                { text: "Suyun donarak buza dönüşmesi", isCorrect: false, svgId: "ice_melting" }
+              ]
+            }
+          },
+          {
+            id: "isi_isik",
+            label: "Işık oluşumu",
+            color: "bg-yellow-500",
+            question: {
+              text: "Hangi olayda açığa çıkan ışık kimyasal bir tepkimenin göstergesidir?",
+              options: [
+                { text: "Ampulün yanması", isCorrect: false, svgId: "lightbulb" },
+                { text: "Odunun yanması", isCorrect: true, svgId: "burning_wood" }
+              ]
+            }
+          },
+          {
+            id: "koku",
+            label: "Koku değişimi",
+            color: "bg-teal-500",
+            question: {
+              text: "Koku değişimi hangi durumda kimyasal bir değişimi gösterir?",
+              options: [
+                { text: "Yemeğin bozulması (ekşimesi)", isCorrect: true, svgId: "spoiled_food" },
+                { text: "Odanın parfüm kokması", isCorrect: false, svgId: "perfume" }
+              ]
+            }
+          },
+          {
+            id: "enerji",
+            label: "Enerji değişimi",
+            color: "bg-emerald-500",
+            question: {
+              text: "Kimyasal tepkimelerde enerji (ısı) değişimi gözlenir. Hangisi kimyasal bir ısı değişimidir?",
+              options: [
+                { text: "Havai fişek patlaması", isCorrect: true, svgId: "fireworks" },
+                { text: "Buzun erimesi", isCorrect: false, svgId: "ice_melting" }
+              ]
+            }
           }
-        ]
-      },
-      {
-        id: "t1_m3",
-        title: "3D Molekül Modelleri",
-        description: "Taneciklerin yeniden düzenlenmesini 3 boyutlu olarak incele.",
-        type: "interactive",
-        models: [
-          {
-            name: "Su",
-            formula: "H₂O",
-            atoms: [
-              { element: "O", position: [0, 0, 0] },
-              { element: "H", position: [0.8, -0.6, 0] },
-              { element: "H", position: [-0.8, -0.6, 0] }
-            ],
-            bonds: [
-              { start: [0, 0, 0], end: [0.8, -0.6, 0] },
-              { start: [0, 0, 0], end: [-0.8, -0.6, 0] }
-            ]
-          },
-          {
-            name: "Karbondioksit",
-            formula: "CO₂",
-            atoms: [
-              { element: "C", position: [0, 0, 0] },
-              { element: "O", position: [1.2, 0, 0] },
-              { element: "O", position: [-1.2, 0, 0] }
-            ],
-            bonds: [
-              { start: [0, 0, 0], end: [1.2, 0, 0] },
-              { start: [0, 0, 0], end: [-1.2, 0, 0] }
-            ]
-          },
-          {
-            name: "Metan",
-            formula: "CH₄",
-            atoms: [
-              { element: "C", position: [0, 0, 0] },
-              { element: "H", position: [0, 1, 0] },
-              { element: "H", position: [0.94, -0.33, 0] },
-              { element: "H", position: [-0.47, -0.33, 0.81] },
-              { element: "H", position: [-0.47, -0.33, -0.81] }
-            ],
-            bonds: [
-              { start: [0, 0, 0], end: [0, 1, 0] },
-              { start: [0, 0, 0], end: [0.94, -0.33, 0] },
-              { start: [0, 0, 0], end: [-0.47, -0.33, 0.81] },
-              { start: [0, 0, 0], end: [-0.47, -0.33, -0.81] }
-            ]
-          }
-        ]
-      },
-      {
-        id: "t1_m4",
-        title: "Tepkime Türleri Eşleştirme",
-        description: "Tepkime türlerini doğru açıklamalarla eşleştir.",
-        type: "matching",
-        pairs: [
-          { left: "Çökelme Tepkimesi", right: "İki sulu çözelti karıştırıldığında katı bir maddenin (çökelek) oluşmasıdır." },
-          { left: "Asit-Baz Tepkimesi", right: "Asit ve bazın tepkimeye girerek tuz ve genellikle su oluşturmasıdır (Nötralleşme)." },
-          { left: "Redoks (İndirgenme-Yükseltgenme)", right: "Elektron alışverişi ile gerçekleşen, yanma ve paslanma gibi tepkimelerdir." },
-          { left: "Sentez (Oluşum) Tepkimesi", right: "İki veya daha fazla basit maddenin birleşerek daha karmaşık bir madde oluşturmasıdır." }
-        ]
-      },
-      {
-        id: "t1_m5",
-        title: "Mol Kavramı",
-        description: "Avogadro sayısı ve mol hesaplamaları.",
-        type: "lesson",
-        content: "Atomlar ve moleküller çok küçük oldukları için onları tek tek saymak imkansızdır. Bu yüzden kimyada 'Mol' birimi kullanılır.\n\n**1 Mol = 6,02 x 10²³ tane tanecik (Avogadro Sayısı)**\n\nNasıl ki 1 düzine 12 adet demekse, 1 mol de 6,02x10²³ adet demektir. Bir maddenin 1 molünün kütlesine 'Mol Kütlesi' (MA) denir ve birimi g/mol'dür.\n\n**Formül:** n = m / MA\n(n: Mol sayısı, m: Kütle, MA: Mol kütlesi)"
-      },
-      {
-        id: "t1_m6",
-        title: "Gazların Özellikleri",
-        description: "Basınç, hacim, sıcaklık ve madde miktarı ilişkisi.",
-        type: "lesson",
-        content: "Gazların davranışlarını tanımlayan 4 temel özellik vardır:\n\n- **Basınç (P):** Gaz moleküllerinin kaba çarpma kuvveti (Birim: atm).\n- **Hacim (V):** Gazın kapladığı alan (Bulunduğu kabın hacmini alır, Birim: Litre).\n- **Sıcaklık (T):** Gaz moleküllerinin ortalama kinetik enerjisi (Kelvin cinsinden hesaplanır. T = °C + 273).\n- **Madde Miktarı (n):** Gazın mol sayısı.\n\nİdeal Gaz Denklemi: **P.V = n.R.T** formülü ile bu değişkenler arasındaki ilişki ifade edilir."
-      },
-      {
-        id: "t1_m7",
-        title: "Gaz Yasaları Eşleştirme",
-        description: "Bilim insanları ve buldukları gaz yasalarını eşleştir.",
-        type: "matching",
-        pairs: [
-          { left: "Boyle Yasası", right: "Sabit sıcaklıkta, bir gazın basıncı ile hacmi ters orantılıdır (P₁V₁ = P₂V₂)." },
-          { left: "Charles Yasası", right: "Sabit basınçta, bir gazın hacmi ile mutlak sıcaklığı doğru orantılıdır (V₁/T₁ = V₂/T₂)." },
-          { left: "Avogadro Yasası", right: "Sabit sıcaklık ve basınçta, eşit hacimdeki gazların mol sayıları (tanecik sayıları) eşittir." },
-          { left: "Gay-Lussac Yasası", right: "Sabit hacimde, bir gazın basıncı ile mutlak sıcaklığı doğru orantılıdır (P₁/T₁ = P₂/T₂)." }
         ]
       }
     ]
   },
   {
     id: "tema2",
-    title: "2. TEMA: ÇEŞİTLİLİK",
-    description: "Çözünme süreci, çözeltiler ve koligatif özellikler.",
+    title: "2. TEMA: MADDENİN TANECİKLİ YAPISI",
+    description: "Moleküller, atomlar ve tanecik modelleri.",
+    order: 2,
     modules: [
       {
         id: "t2_m1",
-        title: "Çözünme Süreci",
-        description: "Maddelerin birbiri içinde nasıl çözündüğünü öğren.",
-        type: "lesson",
-        content: "Çözünme, bir maddenin başka bir madde içinde homojen olarak dağılmasıdır. Temel kural: **'Benzer benzeri çözer.'**\n\n- Polar maddeler polar çözücülerde (örn: Su ve Alkol)\n- Apolar maddeler apolar çözücülerde (örn: Benzen ve İyot) iyi çözünür.\n\nİyonik bileşikler suda çözündüklerinde iyonlarına ayrışırlar (örn: Tuzlu su), bu nedenle elektrik akımını iletirler (Elektrolit çözelti)."
-      },
-      {
-        id: "t2_m2",
-        title: "Çözeltiler Testi",
-        description: "Çözünme kuralları ve çözelti türleri.",
+        title: "Molekül Modelleri Testi",
+        description: "20 farklı molekülün ismini ve formülünü 3 boyutlu modelleriyle eşleştirerek test et.",
         type: "quiz",
-        questions: [
-          {
-            q: "Aşağıdaki karışımlardan hangisi elektrolit (elektriği ileten) bir çözeltidir?",
-            options: ["Şekerli su", "Tuzlu su", "Alkollü su", "Zeytinyağı-su"],
-            answer: 1
-          },
-          {
-            q: "'Benzer benzeri çözer' kuralına göre, apolar bir madde olan İyot (I₂) aşağıdakilerden hangisinde en iyi çözünür?",
-            options: ["Su (Polar)", "Karbon tetraklorür (Apolar)", "Amonyak (Polar)", "Hidrojen florür (Polar)"],
-            answer: 1
-          },
-          {
-            q: "Aşağıdakilerden hangisi çözünürlüğe etki eden faktörlerden biri DEĞİLDİR?",
-            options: ["Sıcaklık", "Basınç (Gazlar için)", "Çözücü ve çözünen cinsi", "Kabın şekli"],
-            answer: 3
-          }
-        ]
-      },
-      {
-        id: "t2_m3",
-        title: "Koligatif Özellikler",
-        description: "Çözünen maddenin tanecik sayısının çözeltilerin kaynama ve donma noktasına etkisi.",
-        type: "lesson",
-        content: "Bir çözeltinin, sadece içinde çözünen taneciklerin (iyon veya molekül) derişimine bağlı olan özelliklerine **Koligatif Özellikler** denir.\n\n1. **Kaynama Noktası Yükselmesi:** Saf suya tuz eklendiğinde kaynama noktası 100°C'nin üzerine çıkar. Çözünen madde miktarı arttıkça kaynama noktası daha da yükselir.\n2. **Donma Noktası Düşmesi:** Kışın yollara tuz dökülmesinin sebebi suyun donma noktasını 0°C'nin altına düşürerek buzlanmayı önlemektir.\n\nBu özellikler, çözünen maddenin cinsine değil, tamamen ortamdaki toplam tanecik (iyon/molekül) sayısına bağlıdır."
+        questions: generateMoleculeQuiz()
       }
     ]
   },
   {
     id: "tema3",
-    title: "3. TEMA: SÜRDÜRÜLEBİLİRLİK",
-    description: "Kimyasal tepkimelerin ekosisteme etkileri ve çevre bilinci.",
+    title: "3. TEMA: KİMYASAL TEPKİMELER",
+    description: "Kimyasal tepkimeleri modelleme ve denkleştirme.",
+    order: 3,
     modules: [
       {
         id: "t3_m1",
-        title: "Atmosferin Doğası ve Çevre Sorunları",
-        description: "Kimyasal tepkimelerin atmosferdeki etkileri.",
-        type: "lesson",
-        content: "İnsan faaliyetleri sonucu atmosfere salınan gazlar çeşitli çevre sorunlarına yol açar:\n\n- **Sera Etkisi:** CO₂, CH₄ gibi gazların yeryüzünden yansıyan ısıyı tutarak küresel ısınmaya neden olması.\n- **Asit Yağmurları:** Fosil yakıtların yanmasıyla oluşan SO₂ ve NO₂ gazlarının havadaki su buharıyla birleşerek asit (H₂SO₄, HNO₃) olarak yeryüzüne düşmesi. Bu durum tarihi eserlere ve ormanlara zarar verir.\n- **Ozon Tabakasının İncelmesi:** CFC (kloroflorokarbon) gazlarının stratosferdeki ozon (O₃) moleküllerini parçalaması.\n\nSürdürülebilir bir gelecek için yeşil kimya prensiplerini uygulamalı, atom ekonomisini artırmalı ve su ayak izimizi azaltmalıyız."
-      },
-      {
-        id: "t3_m2",
-        title: "Çevre ve Sürdürülebilirlik Testi",
-        description: "Çevre sorunları ve yeşil kimya bilginizi test edin.",
-        type: "quiz",
-        questions: [
+        title: "Tepkime Denkleştirme Laboratuvarı",
+        description: "3 boyutlu molekül modellerini kullanarak kimyasal tepkimeleri denkleştir ve gerçekleştir.",
+        type: "reaction",
+        reactions: [
           {
-            q: "Aşağıdaki gazlardan hangisi asit yağmurlarına neden olan temel gazlardan biridir?",
-            options: ["Oksijen (O₂)", "Kükürt dioksit (SO₂)", "Azot (N₂)", "Helyum (He)"],
-            answer: 1
+            id: "r1",
+            title: "Suyun Sentezi",
+            description: "Hidrojen ve Oksijen gazları birleşerek suyu oluşturur. Giren ve çıkan atom sayılarını eşitleyin.",
+            reactants: [
+              { molecule: molecules.h2, correctCoefficient: 2 },
+              { molecule: molecules.o2, correctCoefficient: 1 }
+            ],
+            products: [
+              { molecule: molecules.h2o, correctCoefficient: 2 }
+            ]
           },
           {
-            q: "Sera etkisine neden olarak küresel ısınmayı en çok artıran gaz aşağıdakilerden hangisidir?",
-            options: ["Karbondioksit (CO₂)", "Oksijen (O₂)", "Hidrojen (H₂)", "Argon (Ar)"],
-            answer: 0
+            id: "r2",
+            title: "Amonyak Sentezi (Haber-Bosch)",
+            description: "Azot ve Hidrojen gazlarından Amonyak elde edilir. Denklemi denkleştirin.",
+            reactants: [
+              { molecule: molecules.n2, correctCoefficient: 1 },
+              { molecule: molecules.h2, correctCoefficient: 3 }
+            ],
+            products: [
+              { molecule: molecules.nh3, correctCoefficient: 2 }
+            ]
           },
           {
-            q: "Yeşil kimya prensiplerine göre aşağıdakilerden hangisi hedeflenmez?",
-            options: ["Atık oluşumunu önlemek", "Yenilenebilir hammaddeler kullanmak", "Atom ekonomisini maksimize etmek", "Zehirli çözücü kullanımını artırmak"],
-            answer: 3
+            id: "r3",
+            title: "Metan Yanması",
+            description: "Metan gazı oksijenle yandığında Karbondioksit ve Su açığa çıkar.",
+            reactants: [
+              { molecule: molecules.ch4, correctCoefficient: 1 },
+              { molecule: molecules.o2, correctCoefficient: 2 }
+            ],
+            products: [
+              { molecule: molecules.co2, correctCoefficient: 1 },
+              { molecule: molecules.h2o, correctCoefficient: 2 }
+            ]
           }
         ]
       }

@@ -18,10 +18,6 @@ export function MainLayout() {
     { path: '/map', icon: Map, label: 'İlerleme Haritası' },
   ];
 
-  if (userProfile?.isAdmin) {
-    navItems.push({ path: '/admin', icon: ShieldAlert, label: 'Admin Panel' });
-  }
-
   return (
     <div className="min-h-screen font-sans text-slate-50 flex">
       <AnimatedBackground />
@@ -32,7 +28,7 @@ export function MainLayout() {
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center shadow-[0_0_15px_rgba(6,182,212,0.5)]">
             <Atom className="w-6 h-6 text-white" />
           </div>
-          <span className="text-xl font-bold font-display tracking-tight text-white">ReactionLab</span>
+          <span className="text-xl font-bold font-display tracking-tight text-white">ReaksiyonLab</span>
         </div>
 
         <div className="p-6 flex-1">

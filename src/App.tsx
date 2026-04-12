@@ -14,9 +14,6 @@ import { Dashboard } from './pages/Dashboard';
 import { ProgressMap } from './pages/ProgressMap';
 import { ModuleView } from './pages/ModuleView';
 import { MainLayout } from './components/MainLayout';
-import { AdminDashboard } from './pages/admin/AdminDashboard';
-import { ThemeEditor } from './pages/admin/ThemeEditor';
-import { ModuleEditor } from './pages/admin/ModuleEditor';
 
 // Protected Route Wrapper
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -26,19 +23,6 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   
   if (!currentUser) {
     return <Navigate to="/login" replace />;
-  }
-  
-  return <>{children}</>;
-}
-
-// Admin Route Wrapper
-function AdminRoute({ children }: { children: React.ReactNode }) {
-  const { currentUser, userProfile, loading } = useAuth();
-  
-  if (loading) return <div className="min-h-screen flex items-center justify-center bg-slate-950 text-white">Yükleniyor...</div>;
-  
-  if (!currentUser || !userProfile?.isAdmin) {
-    return <Navigate to="/dashboard" replace />;
   }
   
   return <>{children}</>;
@@ -73,11 +57,6 @@ export default function App() {
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/map" element={<ProgressMap />} />
               <Route path="/module/:moduleId" element={<ModuleView />} />
-              
-              {/* Admin Routes */}
-              <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
-              <Route path="/admin/theme/:themeId" element={<AdminRoute><ThemeEditor /></AdminRoute>} />
-              <Route path="/admin/theme/:themeId/module/:moduleId" element={<AdminRoute><ModuleEditor /></AdminRoute>} />
             </Route>
             
             {/* Fallback */}

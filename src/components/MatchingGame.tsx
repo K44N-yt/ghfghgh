@@ -1,26 +1,43 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { CheckCircle2, XCircle } from 'lucide-react';
+import { MoleculeViewer } from './MoleculeViewer';
+import { MoleculeData } from '../types/curriculum';
+
+interface MatchingPair {
+  left: string;
+  right: string;
+  rightType?: 'text' | 'molecule';
+  rightMolecule?: MoleculeData;
+}
 
 interface MatchingGameProps {
-  pairs: { left: string; right: string }[];
-  onComplete: () => void;
+  pairs: MatchingPair[];
+  onComplete: (score: number) => void;
 }
 
 export function MatchingGame({ pairs, onComplete }: MatchingGameProps) {
   const [leftItems, setLeftItems] = useState<{ id: string; text: string }[]>([]);
-  const [rightItems, setRightItems] = useState<{ id: string; text: string }[]>([]);
+  const [rightItems, setRightItems] = useState<{ id: string; text: string; type?: 'text' | 'molecule'; molecule?: MoleculeData }[]>([]);
   
   const [selectedLeft, setSelectedLeft] = useState<string | null>(null);
   const [selectedRight, setSelectedRight] = useState<string | null>(null);
   
   const [matchedPairs, setMatchedPairs] = useState<string[]>([]);
   const [errorPair, setErrorPair] = useState<{ left: string; right: string } | null>(null);
+  
+  const [errors, setErrors] = useState(0);
+  const [startTime] = useState(Date.now());
 
   // Shuffle arrays on mount
   useEffect(() => {
     const shuffledLeft = [...pairs].sort(() => Math.random() - 0.5).map(p => ({ id: p.left, text: p.left }));
-    const shuffledRight = [...pairs].sort(() => Math.random() - 0.5).map(p => ({ id: p.right, text: p.right }));
+    const shuffledRight = [...pairs].sort(() => Math.random() - 0.5).map(p => ({ 
+      id: p.right, 
+      text: p.right,
+      type: p.rightType,
+      molecule: p.rightMolecule
+    }));
     
     setLeftItems(shuffledLeft);
     setRightItems(shuffledRight);
@@ -39,6 +56,7 @@ export function MatchingGame({ pairs, onComplete }: MatchingGameProps) {
       } else {
         // Match failed
         setErrorPair({ left: selectedLeft, right: selectedRight });
+        setErrors(prev => prev + 1);
         
         // Reset selection after delay
         setTimeout(() => {
@@ -53,11 +71,14 @@ export function MatchingGame({ pairs, onComplete }: MatchingGameProps) {
   // Check for completion
   useEffect(() => {
     if (matchedPairs.length === pairs.length && pairs.length > 0) {
+      const timeInSeconds = Math.floor((Date.now() - startTime) / 1000);
+      const calculatedScore = Math.max(0, 1000 - (errors * 50) - (timeInSeconds * 2));
+      
       setTimeout(() => {
-        onComplete();
+        onComplete(calculatedScore);
       }, 1500);
     }
-  }, [matchedPairs, pairs, onComplete]);
+  }, [matchedPairs, pairs, onComplete, errors, startTime]);
 
   return (
     <div className="w-full">
@@ -77,7 +98,7 @@ export function MatchingGame({ pairs, onComplete }: MatchingGameProps) {
             const isSelected = selectedLeft === item.id;
             const isError = errorPair?.left === item.id;
             
-            let btnClass = "w-full text-left p-4 rounded-xl border transition-all ";
+            let btnClass = "w-full text-left p-4 rounded-xl border transition-all h-full min-h-[80px] ";
             if (isMatched) {
               btnClass += "border-emerald-500/50 bg-emerald-500/10 text-emerald-400 opacity-50 cursor-default";
             } else if (isError) {
@@ -96,10 +117,10 @@ export function MatchingGame({ pairs, onComplete }: MatchingGameProps) {
                 onClick={() => setSelectedLeft(isSelected ? null : item.id)}
                 className={btnClass}
               >
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between h-full">
                   <span className="font-medium">{item.text}</span>
-                  {isMatched && <CheckCircle2 className="w-5 h-5" />}
-                  {isError && <XCircle className="w-5 h-5" />}
+                  {isMatched && <CheckCircle2 className="w-5 h-5 shrink-0 ml-2" />}
+                  {isError && <XCircle className="w-5 h-5 shrink-0 ml-2" />}
                 </div>
               </motion.button>
             );
@@ -115,7 +136,7 @@ export function MatchingGame({ pairs, onComplete }: MatchingGameProps) {
             const isSelected = selectedRight === item.id;
             const isError = errorPair?.right === item.id;
             
-            let btnClass = "w-full text-left p-4 rounded-xl border transition-all text-sm ";
+            let btnClass = "w-full text-left p-4 rounded-xl border transition-all text-sm relative overflow-hidden ";
             if (isMatched) {
               btnClass += "border-emerald-500/50 bg-emerald-500/10 text-emerald-400 opacity-50 cursor-default";
             } else if (isError) {
@@ -134,10 +155,22 @@ export function MatchingGame({ pairs, onComplete }: MatchingGameProps) {
                 onClick={() => setSelectedRight(isSelected ? null : item.id)}
                 className={btnClass}
               >
-                <div className="flex items-center justify-between">
-                  <span className="leading-relaxed">{item.text}</span>
-                  {isMatched && <CheckCircle2 className="w-5 h-5 shrink-0 ml-2" />}
-                  {isError && <XCircle className="w-5 h-5 shrink-0 ml-2" />}
+                <div className="flex items-center justify-between min-h-[48px]">
+                  {item.type === 'molecule' && item.molecule ? (
+                    <div className="w-full h-32 pointer-events-none">
+                      <MoleculeViewer 
+                        model={item.molecule} 
+                        disableInteraction={true} 
+                        hideLabels={true} 
+                        className="w-full h-full bg-transparent border-none"
+                      />
+                    </div>
+                  ) : (
+                    <span className="leading-relaxed">{item.text}</span>
+                  )}
+                  
+                  {isMatched && <CheckCircle2 className="w-5 h-5 shrink-0 ml-2 absolute top-4 right-4" />}
+                  {isError && <XCircle className="w-5 h-5 shrink-0 ml-2 absolute top-4 right-4" />}
                 </div>
               </motion.button>
             );

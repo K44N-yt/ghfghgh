@@ -18,11 +18,23 @@ export function Landing() {
       {/* Navigation / Header */}
       <nav className="fixed top-0 w-full z-50 glass-card rounded-none border-x-0 border-t-0 border-b-white/10 px-4 sm:px-6 lg:px-8 py-4">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center shadow-[0_0_10px_rgba(6,182,212,0.5)]">
-              <Atom className="w-5 h-5 text-white" />
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center shadow-[0_0_10px_rgba(6,182,212,0.5)]">
+                <Atom className="w-5 h-5 text-white" />
+              </div>
+              <span className="text-xl font-bold font-display tracking-tight text-white">ReaksiyonLab</span>
             </div>
-            <span className="text-xl font-bold font-display tracking-tight text-white">ReactionLab</span>
+            
+            <div className="hidden sm:flex items-center gap-2 pl-4 border-l border-slate-700">
+              <img 
+                src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/Milli_E%C4%9Fitim_Bakanl%C4%B1%C4%9F%C4%B1_Logo.svg/1280px-Milli_E%C4%9Fitim_Bakanl%C4%B1%C4%9F%C4%B1_Logo.svg.png" 
+                alt="MEB Logo" 
+                className="h-8 w-auto object-contain"
+                referrerPolicy="no-referrer"
+              />
+              <span className="text-xs text-slate-400 font-medium leading-tight">T.C. Millî Eğitim<br/>Bakanlığı</span>
+            </div>
           </div>
           
           <div className="flex items-center gap-4">

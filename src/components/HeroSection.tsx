@@ -39,7 +39,10 @@ export function HeroSection({ onStart }: HeroSectionProps) {
               <Play className="w-5 h-5 fill-current" />
               Platforma Başla
             </button>
-            <button className="px-8 py-4 rounded-xl glass-card glass-card-hover text-white font-semibold text-lg transition-all duration-300 flex items-center justify-center gap-2">
+            <button 
+              onClick={() => document.getElementById('topics')?.scrollIntoView({ behavior: 'smooth' })}
+              className="px-8 py-4 rounded-xl glass-card glass-card-hover text-white font-semibold text-lg transition-all duration-300 flex items-center justify-center gap-2"
+            >
               <Beaker className="w-5 h-5" />
               Konuları Keşfet
             </button>
