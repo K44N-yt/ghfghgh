@@ -87,11 +87,58 @@ export interface ClassificationData {
   items: ClassificationItem[];
 }
 
+export interface ReactionTypeOption {
+  id: string;
+  label: string;
+  colorClass: string;
+}
+
+export interface ReactionTypeItem {
+  id: string;
+  equation: string;
+  reactants: { formula: string; state: string; color?: string }[];
+  products: { formula: string; state: string; color?: string }[];
+  correctType: string;
+  explanation: string;
+  animationType?: 'precipitation' | 'acid-base' | 'redox' | 'synthesis' | 'decomposition';
+}
+
+export interface ReactionTypeData {
+  id: string;
+  title: string;
+  description: string;
+  options: ReactionTypeOption[];
+  items: ReactionTypeItem[];
+}
+
+export interface MoleCalcOption {
+  id: string;
+  label: string;
+  isCorrect: boolean;
+}
+
+export interface MoleCalcItem {
+  id: string;
+  calcType: 'mass' | 'particle' | 'volume';
+  questionText: string;
+  givenValue: string;
+  subText?: string;
+  options: MoleCalcOption[];
+  explanation: string;
+}
+
+export interface MoleCalculationData {
+  id: string;
+  title: string;
+  description: string;
+  items: MoleCalcItem[];
+}
+
 export interface Module {
   id: string;
   title: string;
   description: string;
-  type: 'lesson' | 'quiz' | 'interactive' | 'matching' | 'mindmap' | 'reaction' | 'classification';
+  type: 'lesson' | 'quiz' | 'interactive' | 'matching' | 'mindmap' | 'reaction' | 'classification' | 'reaction-classification' | 'mole-calculation';
   
   // For lesson
   blocks?: ContentBlock[];
@@ -118,6 +165,12 @@ export interface Module {
 
   // For classification
   classifications?: ClassificationData[];
+
+  // For reaction-classification
+  reactionClassifications?: ReactionTypeData[];
+
+  // For mole-calculation
+  moleCalculations?: MoleCalculationData[];
 }
 
 export interface Theme {

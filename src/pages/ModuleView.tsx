@@ -10,6 +10,8 @@ import { MindmapActivity } from '../components/MindmapActivity';
 import { Leaderboard } from '../components/Leaderboard';
 import { ReactionGame } from '../components/ReactionGame';
 import { ClassificationGame } from '../components/ClassificationGame';
+import { ReactionClassificationGame } from '../components/ReactionClassificationGame';
+import { MoleCalculationGame } from '../components/MoleCalculationGame';
 
 export function ModuleView() {
   const { moduleId } = useParams();
@@ -28,6 +30,8 @@ export function ModuleView() {
   const [mindmapFinished, setMindmapFinished] = useState(false);
   const [reactionFinished, setReactionFinished] = useState(false);
   const [classificationFinished, setClassificationFinished] = useState(false);
+  const [reactionClassificationFinished, setReactionClassificationFinished] = useState(false);
+  const [moleCalculationFinished, setMoleCalculationFinished] = useState(false);
 
   const [correctAnswers, setCorrectAnswers] = useState(0);
   const [scoreSubmitted, setScoreSubmitted] = useState(false);
@@ -132,6 +136,22 @@ export function ModuleView() {
     }
   };
 
+  const handleReactionClassificationComplete = async (score: number) => {
+    setReactionClassificationFinished(true);
+    if (!scoreSubmitted) {
+      await submitScore(moduleData!.id, score);
+      setScoreSubmitted(true);
+    }
+  };
+
+  const handleMoleCalculationComplete = async (score: number) => {
+    setMoleCalculationFinished(true);
+    if (!scoreSubmitted) {
+      await submitScore(moduleData!.id, score);
+      setScoreSubmitted(true);
+    }
+  };
+
   return (
     <div className="max-w-3xl mx-auto pb-12">
       <button 
@@ -161,8 +181,68 @@ export function ModuleView() {
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="glass-card p-8 border-cyan-500/20"
+        className="glass-card p-4 sm:p-8 border-cyan-500/20 w-full"
       >
+        {/* MOLE CALCULATION GAME TYPE */}
+        {moduleData.type === 'mole-calculation' && moduleData.moleCalculations && (
+          <div className="space-y-8">
+            {!moleCalculationFinished ? (
+              <MoleCalculationGame data={moduleData.moleCalculations[0]} onComplete={handleMoleCalculationComplete} />
+            ) : (
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="text-center py-8"
+              >
+                <Trophy className="w-16 h-16 text-amber-400 mx-auto mb-4" />
+                <h2 className="text-2xl font-bold text-white mb-2">Hesaplamalar Tamamlandı!</h2>
+                
+                <div className="mb-8 text-left">
+                  <Leaderboard moduleId={moduleData.id} />
+                </div>
+
+                <button 
+                  onClick={() => handleComplete()}
+                  className="px-8 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-medium transition-colors shadow-[0_0_15px_rgba(6,182,212,0.3)] inline-flex items-center gap-2 mt-8"
+                >
+                  {completed ? 'Haritaya Dön' : 'Devam Et'}
+                  <ArrowLeft className="w-5 h-5 rotate-180" />
+                </button>
+              </motion.div>
+            )}
+          </div>
+        )}
+
+        {/* REACTION CLASSIFICATION GAME TYPE */}
+        {moduleData.type === 'reaction-classification' && moduleData.reactionClassifications && (
+          <div className="space-y-8">
+            {!reactionClassificationFinished ? (
+              <ReactionClassificationGame data={moduleData.reactionClassifications[0]} onComplete={handleReactionClassificationComplete} />
+            ) : (
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="text-center py-8"
+              >
+                <Trophy className="w-16 h-16 text-amber-400 mx-auto mb-4" />
+                <h2 className="text-2xl font-bold text-white mb-2">Tepkime Sınıflandırması Tamamlandı!</h2>
+                
+                <div className="mb-8 text-left">
+                  <Leaderboard moduleId={moduleData.id} />
+                </div>
+
+                <button 
+                  onClick={() => handleComplete()}
+                  className="px-8 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-medium transition-colors shadow-[0_0_15px_rgba(6,182,212,0.3)] inline-flex items-center gap-2 mt-8"
+                >
+                  {completed ? 'Haritaya Dön' : 'Devam Et'}
+                  <ArrowLeft className="w-5 h-5 rotate-180" />
+                </button>
+              </motion.div>
+            )}
+          </div>
+        )}
+
         {/* CLASSIFICATION GAME TYPE */}
         {moduleData.type === 'classification' && moduleData.classifications && (
           <div className="space-y-8">
@@ -364,7 +444,7 @@ export function ModuleView() {
         {/* MINDMAP TYPE */}
         {moduleData.type === 'mindmap' && moduleData.mindmapNodes && (
           <div className="space-y-8">
-            <MindmapActivity nodes={moduleData.mindmapNodes} onComplete={handleMindmapComplete} />
+            <MindmapActivity nodes={moduleData.mindmapNodes} centralText={moduleData.title} onComplete={handleMindmapComplete} />
             
             {mindmapFinished && (
               <motion.div 

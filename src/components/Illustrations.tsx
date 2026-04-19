@@ -183,6 +183,120 @@ export function Illustration({ id }: IllustrationProps) {
           <circle cx="20" cy="70" r="2" fill="#a78bfa" />
         </svg>
       );
+    case 'gas_compress':
+      return (
+        <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-lg">
+          {/* Syringe Body */}
+          <rect x="35" y="40" width="30" height="50" fill="#e2e8f0" stroke="#94a3b8" strokeWidth="2" opacity="0.8" rx="2" />
+          {/* Syringe Tip */}
+          <rect x="47" y="90" width="6" height="5" fill="#94a3b8" />
+          {/* Plunger */}
+          <rect x="42" y="10" width="16" height="40" fill="#475569" />
+          <rect x="30" y="5" width="40" height="5" fill="#334155" rx="1" />
+          {/* Gas Particles tightly packed */}
+          <circle cx="40" cy="65" r="2" fill="#38bdf8" />
+          <circle cx="50" cy="70" r="2" fill="#38bdf8" />
+          <circle cx="60" cy="60" r="2" fill="#38bdf8" />
+          <circle cx="45" cy="80" r="2" fill="#38bdf8" />
+          <circle cx="55" cy="85" r="2" fill="#38bdf8" />
+          <circle cx="42" cy="75" r="2" fill="#38bdf8" />
+          <circle cx="58" cy="78" r="2" fill="#38bdf8" />
+          <circle cx="48" cy="62" r="2" fill="#38bdf8" />
+          <circle cx="56" cy="68" r="2" fill="#38bdf8" />
+          {/* Forces pulling down */}
+          <path d="M50,-5 L50,5 L45,0 M50,5 L55,0" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+          <path d="M35,20 L35,30 L30,25 M35,30 L40,25" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+          <path d="M65,20 L65,30 L60,25 M65,30 L70,25" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+        </svg>
+      );
+    case 'solid_block':
+      return (
+        <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-lg">
+          {/* Solid Box */}
+          <rect x="30" y="40" width="40" height="40" fill="#94a3b8" stroke="#475569" strokeWidth="4" rx="4" />
+          <circle cx="40" cy="50" r="3" fill="#334155" />
+          <circle cx="50" cy="50" r="3" fill="#334155" />
+          <circle cx="60" cy="50" r="3" fill="#334155" />
+          <circle cx="40" cy="60" r="3" fill="#334155" />
+          <circle cx="50" cy="60" r="3" fill="#334155" />
+          <circle cx="60" cy="60" r="3" fill="#334155" />
+          <circle cx="40" cy="70" r="3" fill="#334155" />
+          <circle cx="50" cy="70" r="3" fill="#334155" />
+          <circle cx="60" cy="70" r="3" fill="#334155" />
+        </svg>
+      );
+    case 'gas_expand':
+      return (
+        <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-lg">
+          {/* Beaker with fire */}
+          <path d="M35,40 L35,80 C35,85 40,90 50,90 C60,90 65,85 65,80 L65,40" fill="none" stroke="#cbd5e1" strokeWidth="3" strokeLinecap="round" />
+          {/* Fire */}
+          <path d="M50,90 Q45,100 50,110 Q55,100 50,90 Z" fill="#ef4444" />
+          {/* Balloon expanded on top */}
+          <path d="M50,10 C30,10 20,30 35,40 C45,45 55,45 65,40 C80,30 70,10 50,10 Z" fill="#f472b6" opacity="0.9" />
+          {/* Expanding arrows inside balloon */}
+          <path d="M50,25 L40,15 M40,15 L45,15 M40,15 L40,20" stroke="#be185d" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+          <path d="M50,25 L60,15 M60,15 L55,15 M60,15 L60,20" stroke="#be185d" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+          <path d="M50,25 L35,30 M35,30 L40,30 M35,30 L35,25" stroke="#be185d" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+          <path d="M50,25 L65,30 M65,30 L60,30 M65,30 L65,25" stroke="#be185d" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+        </svg>
+      );
+    case 'gas_mix':
+      return (
+        <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-lg">
+          {/* Container */}
+          <rect x="25" y="25" width="50" height="50" fill="#f8fafc" stroke="#94a3b8" strokeWidth="3" rx="4" />
+          {/* Mixed particles */}
+          <circle cx="35" cy="40" r="3" fill="#38bdf8" />
+          <circle cx="65" cy="60" r="3" fill="#38bdf8" />
+          <circle cx="45" cy="70" r="3" fill="#38bdf8" />
+          <circle cx="70" cy="35" r="3" fill="#38bdf8" />
+          <circle cx="50" cy="50" r="3" fill="#38bdf8" />
+
+          <circle cx="40" cy="35" r="3" fill="#f43f5e" />
+          <circle cx="60" cy="45" r="3" fill="#f43f5e" />
+          <circle cx="35" cy="65" r="3" fill="#f43f5e" />
+          <circle cx="70" cy="70" r="3" fill="#f43f5e" />
+          <circle cx="55" cy="65" r="3" fill="#f43f5e" />
+        </svg>
+      );
+    case 'oil_water':
+      return (
+        <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-lg">
+          {/* Container */}
+          <rect x="25" y="25" width="50" height="50" fill="#f8fafc" stroke="#94a3b8" strokeWidth="3" rx="4" />
+          {/* Water Layer */}
+          <rect x="26.5" y="55" width="47" height="18.5" fill="#38bdf8" opacity="0.6" rx="2" />
+          {/* Oil Layer */}
+          <rect x="26.5" y="30" width="47" height="25" fill="#facc15" opacity="0.7" rx="2" />
+          {/* Distinction line */}
+          <line x1="26" y1="55" x2="74" y2="55" stroke="#94a3b8" strokeWidth="1" />
+        </svg>
+      );
+    case 'gas_pressure':
+      return (
+        <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-lg">
+          {/* Container */}
+          <rect x="25" y="35" width="50" height="50" fill="#f8fafc" stroke="#64748b" strokeWidth="3" rx="4" />
+          {/* Particles and pressure vectors */}
+          <circle cx="40" cy="45" r="3" fill="#8b5cf6" />
+          <path d="M40,40 L40,35 M40,35 L38,37 M40,35 L42,37" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+          
+          <circle cx="35" cy="65" r="3" fill="#8b5cf6" />
+          <path d="M30,65 L25,65 M25,65 L27,63 M25,65 L27,67" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+          
+          <circle cx="65" cy="55" r="3" fill="#8b5cf6" />
+          <path d="M70,55 L75,55 M75,55 L73,53 M75,55 L73,57" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+          
+          <circle cx="50" cy="80" r="3" fill="#8b5cf6" />
+          <path d="M50,85 L50,90 M50,90 L48,88 M50,90 L52,88" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+          
+          {/* Speed trails */}
+          <path d="M45,45 L50,45" stroke="#cbd5e1" strokeWidth="1" strokeDasharray="1,1" />
+          <path d="M35,60 L35,55" stroke="#cbd5e1" strokeWidth="1" strokeDasharray="1,1" />
+          <path d="M60,50 L55,45" stroke="#cbd5e1" strokeWidth="1" strokeDasharray="1,1" />
+        </svg>
+      );
     default:
       return (
         <svg viewBox="0 0 100 100" className="w-full h-full">

@@ -15,7 +15,7 @@ export function ProgressMap() {
     <div className="space-y-8 pb-12">
       <div>
         <h1 className="text-3xl font-bold font-display text-white mb-2">İlerleme Haritası</h1>
-        <p className="text-slate-400">Kimya müfredatındaki yolculuğun. Kilitli modülleri açmak için önceki görevleri tamamla.</p>
+        <p className="text-slate-400">Kimya müfredatındaki yolculuğun. İstediğin modülden başlayabilir ve dilediğin gibi ilerleyebilirsin.</p>
       </div>
 
       <div className="space-y-12">
@@ -32,26 +32,8 @@ export function ProgressMap() {
               {theme.modules.map((mod, modIndex) => {
                 const isCompleted = userProfile.completedModules.includes(mod.id);
                 
-                // Determine if unlocked (previous module completed, or it's the first module)
-                let isUnlocked = isCompleted;
-                if (!isUnlocked) {
-                  if (themeIndex === 0 && modIndex === 0) {
-                    isUnlocked = true;
-                  } else {
-                    // Find previous module
-                    let prevModId = null;
-                    if (modIndex > 0) {
-                      prevModId = theme.modules[modIndex - 1].id;
-                    } else if (themeIndex > 0) {
-                      const prevTheme = curriculum[themeIndex - 1];
-                      prevModId = prevTheme.modules[prevTheme.modules.length - 1].id;
-                    }
-                    
-                    if (prevModId && userProfile.completedModules.includes(prevModId)) {
-                      isUnlocked = true;
-                    }
-                  }
-                }
+                // Serbest dolaşım: Tüm kilitler kaldırıldı
+                const isUnlocked = true;
 
                 return (
                   <motion.div

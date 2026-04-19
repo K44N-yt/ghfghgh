@@ -6,10 +6,11 @@ import { Illustration } from './Illustrations';
 
 interface MindmapActivityProps {
   nodes: MindmapNode[];
+  centralText?: string;
   onComplete: (score: number) => void;
 }
 
-export function MindmapActivity({ nodes, onComplete }: MindmapActivityProps) {
+export function MindmapActivity({ nodes, centralText = "Merkez Node", onComplete }: MindmapActivityProps) {
   const [selectedNode, setSelectedNode] = useState<MindmapNode | null>(null);
   const [completedNodes, setCompletedNodes] = useState<string[]>([]);
   const [showFeedback, setShowFeedback] = useState<'correct' | 'incorrect' | null>(null);
@@ -81,7 +82,7 @@ export function MindmapActivity({ nodes, onComplete }: MindmapActivityProps) {
 
         {/* Central Node */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 w-32 h-32 sm:w-40 sm:h-40 rounded-full bg-slate-800 border-4 border-cyan-500 flex items-center justify-center text-center p-4 shadow-[0_0_30px_rgba(6,182,212,0.3)]">
-          <span className="font-bold text-white text-sm sm:text-base">Kimyasal Değişimin Göstergeleri</span>
+          <span className="font-bold text-white text-sm sm:text-base">{centralText}</span>
         </div>
 
         {/* Surrounding Nodes */}
