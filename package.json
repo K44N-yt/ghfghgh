@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "clean": "rm -rf dist",
     "lint": "tsc --noEmit",
-    "deploy": "npm run build && npx --yes firebase-tools deploy --only hosting"
+    "deploy": "npm run build && npx --yes firebase-tools deploy"
   },
   "dependencies": {
     "@google/genai": "^1.29.0",

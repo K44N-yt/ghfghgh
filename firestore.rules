@@ -1,0 +1,24 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Kullanıcı profilleri için kurallar (Sadece kendi profillerini okuyup yazabilirler)
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Skor tablosu için kurallar
+    match /moduleScores/{scoreId} {
+      // Herkes (giriş yapmamış olsa bile) skor tablosunu görebilir
+      allow read: if true; 
+      
+      // Sadece giriş yapmış kullanıcılar kendi ID'leriyle skor oluşturabilir
+      allow create: if request.auth != null 
+                    && request.resource.data.userId == request.auth.uid;
+                    
+      // Sadece giriş yapmış kullanıcılar kendi skorlarını güncelleyebilir
+      allow update: if request.auth != null 
+                    && resource.data.userId == request.auth.uid;
+    }
+  }
+}
