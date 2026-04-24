@@ -134,11 +134,31 @@ export interface MoleCalculationData {
   items: MoleCalcItem[];
 }
 
+export interface MazeQuestionOption {
+  id: string;
+  text: string;
+  isCorrect: boolean;
+}
+
+export interface MazeQuestionData {
+  id: string;
+  questionText: string;
+  options: MazeQuestionOption[];
+  explanation?: string;
+}
+
+export interface MazeGameData {
+  id: string;
+  title: string;
+  description: string;
+  questions: MazeQuestionData[];
+}
+
 export interface Module {
   id: string;
   title: string;
   description: string;
-  type: 'lesson' | 'quiz' | 'interactive' | 'matching' | 'mindmap' | 'reaction' | 'classification' | 'reaction-classification' | 'mole-calculation';
+  type: 'lesson' | 'quiz' | 'interactive' | 'matching' | 'mindmap' | 'reaction' | 'classification' | 'reaction-classification' | 'mole-calculation' | 'maze';
   
   // For lesson
   blocks?: ContentBlock[];
@@ -171,6 +191,9 @@ export interface Module {
 
   // For mole-calculation
   moleCalculations?: MoleCalculationData[];
+
+  // For maze game
+  mazeGames?: MazeGameData[];
 }
 
 export interface Theme {

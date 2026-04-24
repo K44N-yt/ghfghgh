@@ -12,6 +12,7 @@ import { ReactionGame } from '../components/ReactionGame';
 import { ClassificationGame } from '../components/ClassificationGame';
 import { ReactionClassificationGame } from '../components/ReactionClassificationGame';
 import { MoleCalculationGame } from '../components/MoleCalculationGame';
+import { MazeGame } from '../components/MazeGame';
 
 export function ModuleView() {
   const { moduleId } = useParams();
@@ -32,6 +33,7 @@ export function ModuleView() {
   const [classificationFinished, setClassificationFinished] = useState(false);
   const [reactionClassificationFinished, setReactionClassificationFinished] = useState(false);
   const [moleCalculationFinished, setMoleCalculationFinished] = useState(false);
+  const [mazeFinished, setMazeFinished] = useState(false);
 
   const [correctAnswers, setCorrectAnswers] = useState(0);
   const [scoreSubmitted, setScoreSubmitted] = useState(false);
@@ -152,6 +154,14 @@ export function ModuleView() {
     }
   };
 
+  const handleMazeComplete = async (score: number) => {
+    setMazeFinished(true);
+    if (!scoreSubmitted) {
+      await submitScore(moduleData!.id, score);
+      setScoreSubmitted(true);
+    }
+  };
+
   return (
     <div className="max-w-3xl mx-auto pb-12">
       <button 
@@ -183,6 +193,36 @@ export function ModuleView() {
         animate={{ opacity: 1, y: 0 }}
         className="glass-card p-4 sm:p-8 border-cyan-500/20 w-full"
       >
+        {/* MAZE GAME TYPE */}
+        {moduleData.type === 'maze' && moduleData.mazeGames && (
+          <div className="space-y-8">
+            {!mazeFinished ? (
+              <MazeGame module={moduleData} onComplete={handleMazeComplete} />
+            ) : (
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="text-center py-8"
+              >
+                <Trophy className="w-16 h-16 text-amber-400 mx-auto mb-4" />
+                <h2 className="text-2xl font-bold text-white mb-2">Labirent Kovalamacası Tamamlandı!</h2>
+                
+                <div className="mb-8 text-left">
+                  <Leaderboard moduleId={moduleData.id} />
+                </div>
+
+                <button 
+                  onClick={() => handleComplete()}
+                  className="px-8 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-medium transition-colors shadow-[0_0_15px_rgba(6,182,212,0.3)] inline-flex items-center gap-2 mt-8"
+                >
+                  {completed ? 'Haritaya Dön' : 'Devam Et'}
+                  <ArrowLeft className="w-5 h-5 rotate-180" />
+                </button>
+              </motion.div>
+            )}
+          </div>
+        )}
+
         {/* MOLE CALCULATION GAME TYPE */}
         {moduleData.type === 'mole-calculation' && moduleData.moleCalculations && (
           <div className="space-y-8">

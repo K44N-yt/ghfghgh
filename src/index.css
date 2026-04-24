@@ -12,6 +12,12 @@
   --animate-float: float 6s ease-in-out infinite;
   --animate-orbit: orbit 10s linear infinite;
   --animate-pulse-glow: pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-pacman-mouth: pacman-mouth 0.3s ease-in-out infinite alternate;
+}
+
+@keyframes pacman-mouth {
+  0% { transform: translateY(-50%) rotate(0deg); }
+  100% { transform: translateY(-50%) rotate(-45deg); }
 }
 
 @keyframes float {
@@ -32,6 +38,10 @@
 
 body {
   @apply bg-slate-950 text-slate-50 antialiased selection:bg-cyan-500/30;
+}
+
+.clip-ghost {
+  clip-path: polygon(0% 100%, 0% 50%, 50% 0%, 100% 50%, 100% 100%, 80% 80%, 60% 100%, 40% 80%, 20% 100%);
 }
 
 .glass-card {

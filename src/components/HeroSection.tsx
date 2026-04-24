@@ -59,7 +59,14 @@ export function HeroSection({ onStart }: HeroSectionProps) {
           {/* Central Atom/Molecule */}
           <div className="relative w-64 h-64 flex items-center justify-center">
             <div className="absolute inset-0 bg-cyan-500/20 rounded-full blur-3xl animate-pulse"></div>
-            <Atom className="w-32 h-32 text-cyan-400 z-10" />
+            <div className="w-48 h-48 rounded-full border-4 border-cyan-500/50 shadow-[0_0_30px_rgba(6,182,212,0.5)] overflow-hidden bg-slate-900 z-10 flex items-center justify-center">
+              <img 
+                src="https://i.hizliresim.com/27jdo2j.png" 
+                alt="Logo" 
+                className="w-full h-full object-cover"
+                referrerPolicy="no-referrer"
+              />
+            </div>
             
             {/* Orbiting Electrons */}
             <div className="absolute inset-0 border border-cyan-500/30 rounded-full animate-[spin_10s_linear_infinite]">

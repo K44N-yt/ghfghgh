@@ -1,5 +1,7 @@
 import { motion } from "motion/react";
 import { Atom, Beaker, Flame, Layers } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 
 const topics = [
   {
@@ -29,6 +31,17 @@ const topics = [
 ];
 
 export function TopicsSection() {
+  const navigate = useNavigate();
+  const { currentUser } = useAuth();
+
+  const handleAction = () => {
+    if (currentUser) {
+      navigate('/dashboard');
+    } else {
+      navigate('/register');
+    }
+  };
+
   return (
     <section id="topics" className="py-24 px-4 sm:px-6 lg:px-8 relative z-10 bg-slate-950/50">
       <div className="max-w-7xl mx-auto">
@@ -37,8 +50,8 @@ export function TopicsSection() {
             <h2 className="text-3xl md:text-4xl font-bold font-display mb-4">Konuları Keşfet</h2>
             <p className="text-slate-400 max-w-2xl">10. Sınıf Maarif Müfredatına uygun olarak hazırlanmış, interaktif kimya konuları.</p>
           </div>
-          <button className="text-cyan-400 hover:text-cyan-300 font-medium flex items-center gap-2 transition-colors">
-            Tüm Konuları Gör &rarr;
+          <button onClick={handleAction} className="text-cyan-400 hover:text-cyan-300 font-medium flex items-center gap-2 transition-colors">
+            Öğrenmeye Başla &rarr;
           </button>
         </div>
 
@@ -50,7 +63,9 @@ export function TopicsSection() {
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4, delay: index * 0.1 }}
-              className="glass-card p-6 cursor-pointer group relative overflow-hidden"
+              onClick={handleAction}
+              className="glass-card p-6 cursor-pointer group relative overflow-hidden text-left w-full block focus:outline-none"
+              as="button"
             >
               <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${topic.color} opacity-10 rounded-bl-full -mr-10 -mt-10 transition-transform duration-500 group-hover:scale-150`} />
               
@@ -62,7 +77,7 @@ export function TopicsSection() {
               <p className="text-sm text-slate-400 leading-relaxed">{topic.description}</p>
               
               <div className="mt-6 flex items-center text-sm font-medium text-slate-300 group-hover:text-cyan-400 transition-colors">
-                İncele
+                Hemen Başla
                 <svg className="w-4 h-4 ml-1 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>

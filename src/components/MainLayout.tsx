@@ -1,7 +1,7 @@
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { AnimatedBackground } from './AnimatedBackground';
-import { Atom, LayoutDashboard, Map, LogOut, User, ShieldAlert } from 'lucide-react';
+import { Atom, LayoutDashboard, Map, LogOut, User, Home } from 'lucide-react';
 
 export function MainLayout() {
   const { userProfile, logout } = useAuth();
@@ -14,6 +14,7 @@ export function MainLayout() {
   };
 
   const navItems = [
+    { path: '/', icon: Home, label: 'Ana Sayfa' },
     { path: '/dashboard', icon: LayoutDashboard, label: 'Panel' },
     { path: '/map', icon: Map, label: 'İlerleme Haritası' },
   ];
@@ -25,10 +26,15 @@ export function MainLayout() {
       {/* Sidebar */}
       <aside className="w-64 glass-card rounded-none border-y-0 border-l-0 border-r-white/10 flex flex-col fixed h-full z-40">
         <div className="p-6 flex items-center gap-3 border-b border-white/10">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center shadow-[0_0_15px_rgba(6,182,212,0.5)]">
-            <Atom className="w-6 h-6 text-white" />
+          <div className="flex items-center justify-center w-12 h-12 rounded-full border-2 border-cyan-500/50 shadow-[0_0_15px_rgba(6,182,212,0.4)] overflow-hidden bg-slate-900 shrink-0">
+            <img 
+              src="https://i.hizliresim.com/27jdo2j.png" 
+              alt="ReaksiyonLab Logo" 
+              className="w-full h-full object-cover"
+              referrerPolicy="no-referrer"
+            />
           </div>
-          <span className="text-xl font-bold font-display tracking-tight text-white">ReaksiyonLab</span>
+          <span className="text-xl font-bold font-display tracking-tight text-white line-clamp-1">ReaksiyonLab</span>
         </div>
 
         <div className="p-6 flex-1">

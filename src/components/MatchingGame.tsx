@@ -98,7 +98,7 @@ export function MatchingGame({ pairs, onComplete }: MatchingGameProps) {
             const isSelected = selectedLeft === item.id;
             const isError = errorPair?.left === item.id;
             
-            let btnClass = "w-full text-left p-4 rounded-xl border transition-all h-full min-h-[80px] ";
+            let btnClass = "w-full text-left p-4 rounded-xl border transition-all relative overflow-hidden ";
             if (isMatched) {
               btnClass += "border-emerald-500/50 bg-emerald-500/10 text-emerald-400 opacity-50 cursor-default";
             } else if (isError) {
@@ -117,10 +117,10 @@ export function MatchingGame({ pairs, onComplete }: MatchingGameProps) {
                 onClick={() => setSelectedLeft(isSelected ? null : item.id)}
                 className={btnClass}
               >
-                <div className="flex items-center justify-between h-full">
-                  <span className="font-medium">{item.text}</span>
-                  {isMatched && <CheckCircle2 className="w-5 h-5 shrink-0 ml-2" />}
-                  {isError && <XCircle className="w-5 h-5 shrink-0 ml-2" />}
+                <div className="flex items-center justify-between min-h-[48px]">
+                  <span className="font-medium leading-relaxed pr-8">{item.text}</span>
+                  {isMatched && <CheckCircle2 className="w-5 h-5 shrink-0 absolute top-1/2 -translate-y-1/2 right-4" />}
+                  {isError && <XCircle className="w-5 h-5 shrink-0 absolute top-1/2 -translate-y-1/2 right-4" />}
                 </div>
               </motion.button>
             );
@@ -157,7 +157,7 @@ export function MatchingGame({ pairs, onComplete }: MatchingGameProps) {
               >
                 <div className="flex items-center justify-between min-h-[48px]">
                   {item.type === 'molecule' && item.molecule ? (
-                    <div className="w-full h-32 pointer-events-none">
+                    <div className="w-full h-32 pointer-events-none pr-8">
                       <MoleculeViewer 
                         model={item.molecule} 
                         disableInteraction={true} 
@@ -166,11 +166,11 @@ export function MatchingGame({ pairs, onComplete }: MatchingGameProps) {
                       />
                     </div>
                   ) : (
-                    <span className="leading-relaxed">{item.text}</span>
+                    <span className="leading-relaxed pr-8">{item.text}</span>
                   )}
                   
-                  {isMatched && <CheckCircle2 className="w-5 h-5 shrink-0 ml-2 absolute top-4 right-4" />}
-                  {isError && <XCircle className="w-5 h-5 shrink-0 ml-2 absolute top-4 right-4" />}
+                  {isMatched && <CheckCircle2 className="w-5 h-5 shrink-0 absolute top-1/2 -translate-y-1/2 right-4" />}
+                  {isError && <XCircle className="w-5 h-5 shrink-0 absolute top-1/2 -translate-y-1/2 right-4" />}
                 </div>
               </motion.button>
             );
