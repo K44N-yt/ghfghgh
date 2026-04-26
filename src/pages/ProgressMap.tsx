@@ -30,7 +30,7 @@ export function ProgressMap() {
             {/* Modules Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
               {theme.modules.map((mod, modIndex) => {
-                const isCompleted = userProfile.completedModules.includes(mod.id);
+                const isCompleted = userProfile.completedModules?.includes(mod.id);
                 
                 // Serbest dolaşım: Tüm kilitler kaldırıldı
                 const isUnlocked = true;

@@ -53,7 +53,7 @@ export function ModuleView() {
   }
 
   useEffect(() => {
-    if (userProfile && moduleData && userProfile.completedModules.includes(moduleData.id)) {
+    if (userProfile && moduleData && userProfile.completedModules?.includes(moduleData.id)) {
       setCompleted(true);
     }
   }, [userProfile, moduleData]);
@@ -64,7 +64,7 @@ export function ModuleView() {
 
   const handleComplete = async () => {
     if (!completed) {
-      const isFirst = userProfile?.completedModules.length === 0;
+      const isFirst = userProfile?.completedModules?.length === 0;
       
       await completeModule(moduleData.id);
       
@@ -91,7 +91,7 @@ export function ModuleView() {
   };
 
   const nextQuestion = async () => {
-    if (currentQuestion < moduleData.questions!.length - 1) {
+    if (currentQuestion < (moduleData.questions?.length ?? 1) - 1) {
       setCurrentQuestion(currentQuestion + 1);
       setSelectedAnswer(null);
       setIsCorrect(null);
@@ -99,7 +99,7 @@ export function ModuleView() {
     } else {
       setQuizFinished(true);
       if (!scoreSubmitted) {
-        const finalScore = Math.round((correctAnswers / moduleData.questions!.length) * 1000);
+        const finalScore = Math.round((correctAnswers / (moduleData.questions?.length ?? 1)) * 1000);
         await submitScore(moduleData!.id, finalScore);
         setScoreSubmitted(true);
       }
@@ -513,10 +513,10 @@ export function ModuleView() {
         {moduleData.type === 'quiz' && moduleData.questions && !quizFinished && (
           <div>
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-semibold text-white">Soru {currentQuestion + 1} / {moduleData.questions.length}</h3>
+              <h3 className="text-xl font-semibold text-white">Soru {currentQuestion + 1} / {moduleData.questions?.length ?? 0}</h3>
               <div className="flex items-center gap-4">
                 <div className="text-sm text-slate-400">
-                  İlerleme: %{Math.round(((currentQuestion) / moduleData.questions.length) * 100)}
+                  İlerleme: %{Math.round(((currentQuestion) / (moduleData.questions?.length ?? 1)) * 100)}
                 </div>
               </div>
             </div>
@@ -524,7 +524,7 @@ export function ModuleView() {
             <div className="h-2 w-full bg-slate-800 rounded-full overflow-hidden mb-8">
               <div 
                 className="h-full bg-cyan-500 transition-all duration-500"
-                style={{ width: `${((currentQuestion) / moduleData.questions.length) * 100}%` }}
+                style={{ width: `${((currentQuestion) / (moduleData.questions?.length ?? 1)) * 100}%` }}
               />
             </div>
 
@@ -633,7 +633,7 @@ export function ModuleView() {
                   onClick={nextQuestion}
                   className="px-6 py-2 rounded-lg bg-cyan-500 hover:bg-cyan-600 text-white font-medium transition-colors"
                 >
-                  {currentQuestion < moduleData.questions.length - 1 ? 'Sonraki Soru' : 'Testi Bitir'}
+                  {currentQuestion < (moduleData.questions?.length ?? 1) - 1 ? 'Sonraki Soru' : 'Testi Bitir'}
                 </button>
               </motion.div>
             )}
@@ -649,7 +649,7 @@ export function ModuleView() {
           >
             <Trophy className="w-16 h-16 text-amber-400 mx-auto mb-4" />
             <h2 className="text-2xl font-bold text-white mb-2">Test Tamamlandı!</h2>
-            <p className="text-slate-400 mb-8">Skorun: {Math.round((correctAnswers / moduleData.questions!.length) * 1000)} Puan</p>
+            <p className="text-slate-400 mb-8">Skorun: {Math.round((correctAnswers / (moduleData.questions?.length ?? 1)) * 1000)} Puan</p>
             
             <div className="mb-8 text-left">
               <Leaderboard moduleId={moduleData.id} />

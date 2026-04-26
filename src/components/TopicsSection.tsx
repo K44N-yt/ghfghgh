@@ -57,7 +57,7 @@ export function TopicsSection() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {topics.map((topic, index) => (
-            <motion.div
+            <motion.button
               key={index}
               initial={{ opacity: 0, scale: 0.9 }}
               whileInView={{ opacity: 1, scale: 1 }}
@@ -65,7 +65,6 @@ export function TopicsSection() {
               transition={{ duration: 0.4, delay: index * 0.1 }}
               onClick={handleAction}
               className="glass-card p-6 cursor-pointer group relative overflow-hidden text-left w-full block focus:outline-none"
-              as="button"
             >
               <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${topic.color} opacity-10 rounded-bl-full -mr-10 -mt-10 transition-transform duration-500 group-hover:scale-150`} />
               
@@ -82,7 +81,7 @@ export function TopicsSection() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </div>
-            </motion.div>
+            </motion.button>
           ))}
         </div>
       </div>

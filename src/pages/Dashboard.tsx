@@ -17,7 +17,7 @@ export function Dashboard() {
   
   for (const theme of curriculum) {
     for (const mod of theme.modules) {
-      if (!userProfile.completedModules.includes(mod.id)) {
+      if (!userProfile.completedModules?.includes(mod.id)) {
         nextModule = mod;
         nextTheme = theme;
         break;
@@ -28,7 +28,7 @@ export function Dashboard() {
 
   // Calculate overall progress
   const totalModules = curriculum.reduce((acc, theme) => acc + theme.modules.length, 0);
-  const completedCount = userProfile.completedModules.length;
+  const completedCount = userProfile.completedModules?.length || 0;
   const overallProgress = Math.round((completedCount / totalModules) * 100) || 0;
 
   return (
@@ -119,7 +119,7 @@ export function Dashboard() {
             <div className="space-y-4">
               {curriculum.map((theme, i) => {
                 const themeModules = theme.modules.length;
-                const completedInTheme = theme.modules.filter(m => userProfile.completedModules.includes(m.id)).length;
+                const completedInTheme = theme.modules.filter(m => userProfile.completedModules?.includes(m.id)).length;
                 const themeProgress = Math.round((completedInTheme / themeModules) * 100);
                 const status = themeProgress === 100 ? 'completed' : (themeProgress > 0 ? 'in-progress' : 'locked');
 
@@ -166,12 +166,12 @@ export function Dashboard() {
           >
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold text-white">Rozetlerin</h3>
-              <span className="text-xs font-medium px-2 py-1 bg-slate-800 rounded-md text-slate-300">{userProfile.badges.length} Kazanıldı</span>
+              <span className="text-xs font-medium px-2 py-1 bg-slate-800 rounded-md text-slate-300">{userProfile.badges?.length || 0} Kazanıldı</span>
             </div>
             
-            {userProfile.badges.length > 0 ? (
+            {(userProfile.badges?.length || 0) > 0 ? (
               <div className="grid grid-cols-3 gap-3">
-                {userProfile.badges.map((badge, i) => (
+                {userProfile.badges?.map((badge, i) => (
                   <div key={i} className="aspect-square rounded-xl flex items-center justify-center bg-cyan-500/10 border border-cyan-500/30 text-cyan-400" title={badge}>
                     <Trophy className="w-6 h-6" />
                   </div>

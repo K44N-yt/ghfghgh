@@ -8,24 +8,56 @@ interface MazeGameProps {
   onComplete: (score: number) => void;
 }
 
-const MAZE_GRID = [
-  "111111111111111111111",
-  "100000000010000000001",
-  "101110111010111011101",
-  "100000100000001000001",
-  "101110101111101011101",
-  "100000000000000000001",
-  "111011111010111110111",
-  "000010000000000010000",
-  "111010111111111010111",
-  "100000000010000000001",
-  "101110111010111011101",
-  "100010000000000010001",
-  "111111111111111111111",
+const MAZE_MAPS = [
+  [
+    "111111111111111111111",
+    "100000000010000000001",
+    "101110111000111011101",
+    "100000100010001000001",
+    "101110101111101011101",
+    "100000000000000000001",
+    "101110111111111011101",
+    "100000000000000000001",
+    "101110111111111011101",
+    "100000000000000000001",
+    "101110101111101011101",
+    "100000100010001000001",
+    "111111111111111111111"
+  ],
+  [
+    "111111111111111111111",
+    "100000000010000000001",
+    "101111111010111111101",
+    "100010000010000010001",
+    "111010111010111010111",
+    "100000000000000000001",
+    "101110111111111011101",
+    "100000000000000000001",
+    "111011101111101110111",
+    "100010000010000010001",
+    "101111111010111111101",
+    "100000000010000000001",
+    "111111111111111111111"
+  ],
+  [
+    "111111111111111111111",
+    "100000100000001000001",
+    "101110101111101011101",
+    "100000000010000000001",
+    "111110111010111011111",
+    "100000000000000000001",
+    "101110111111111011101",
+    "100000000000000000001",
+    "101110111010111011101",
+    "100000000000000000001",
+    "101111101101101111101",
+    "100000101000101000001",
+    "111111111111111111111"
+  ]
 ];
 
-const ROWS = MAZE_GRID.length;
-const COLS = MAZE_GRID[0].length;
+const ROWS = MAZE_MAPS[0].length;
+const COLS = MAZE_MAPS[0][0].length;
 
 const START_POS = { x: 10, y: 7 };
 const ANSWER_POSITIONS = [
@@ -35,10 +67,10 @@ const ANSWER_POSITIONS = [
   { x: 18, y: 11 }
 ];
 const ENEMY_STARTS = [
-  { x: 10, y: 5, color: 'rgb(239, 68, 68)', type: 'blinky' }, // Red - Aggressive
-  { x: 1, y: 5, color: 'rgb(236, 72, 153)', type: 'pinky' },  // Pink - Ambush
-  { x: 19, y: 5, color: 'rgb(34, 211, 238)', type: 'inky' },   // Cyan - Whimsical
-  { x: 10, y: 1, color: 'rgb(245, 158, 11)', type: 'clyde' },  // Orange - Random/Scared
+  { x: 1, y: 1, color: 'rgb(239, 68, 68)', type: 'blinky' },  // Red - Top Left
+  { x: 19, y: 1, color: 'rgb(236, 72, 153)', type: 'pinky' },  // Pink - Top Right
+  { x: 1, y: 11, color: 'rgb(34, 211, 238)', type: 'inky' },   // Cyan - Bottom Left
+  { x: 19, y: 11, color: 'rgb(245, 158, 11)', type: 'clyde' },  // Orange - Bottom Right
 ];
 
 type Dir = 'UP' | 'DOWN' | 'LEFT' | 'RIGHT' | 'NONE';
@@ -56,6 +88,23 @@ interface Enemy extends Entity {
   type: string;
 }
 
+const getInitialEnemies = (qIdx: number): Enemy[] => {
+  const enemyCount = Math.min(1 + Math.floor(qIdx / 3), ENEMY_STARTS.length);
+  return ENEMY_STARTS.slice(0, enemyCount).map((s, index) => {
+    let calculatedSpeed = 0.05 + (qIdx * 0.002) + (index * 0.001);
+    if (calculatedSpeed > 0.09) calculatedSpeed = 0.09;
+    return {
+      x: s.x,
+      y: s.y,
+      dir: 'NONE' as Dir,
+      nextDir: 'NONE' as Dir,
+      speed: calculatedSpeed,
+      color: s.color,
+      type: s.type
+    };
+  });
+};
+
 export function MazeGame({ module, onComplete }: MazeGameProps) {
   const data = module.mazeGames?.[0];
   const questions = data?.questions || [];
@@ -68,22 +117,24 @@ export function MazeGame({ module, onComplete }: MazeGameProps) {
 
   // Smooth position state for rendering (avoiding re-renders for logic if possible, but React needs it)
   const [playerPos, setPlayerPos] = useState({ x: START_POS.x, y: START_POS.y, dir: 'NONE' as Dir });
-  const [enemiesPos, setEnemiesPos] = useState<Enemy[]>([]);
+  const [enemiesPos, setEnemiesPos] = useState<Enemy[]>(() => getInitialEnemies(0));
 
   // Internal logic state
   const playerRef = useRef<Entity>({ x: START_POS.x, y: START_POS.y, dir: 'NONE', nextDir: 'NONE', speed: 0.12 });
-  const enemiesRef = useRef<Enemy[]>([]);
+  const enemiesRef = useRef<Enemy[]>(getInitialEnemies(0));
   const stateRef = useRef(gameState);
-  const requestRef = useRef<number>();
+  const requestRef = useRef<number | null>(null);
 
   useEffect(() => { stateRef.current = gameState; }, [gameState]);
+
+  const currentMazeMap = MAZE_MAPS[currentQIdx % MAZE_MAPS.length];
 
   const isWall = (x: number, y: number) => {
     if (isNaN(x) || isNaN(y)) return true;
     const gridX = Math.round(x);
     const gridY = Math.round(y);
     if (gridY < 0 || gridY >= ROWS) return true;
-    const row = MAZE_GRID[gridY];
+    const row = currentMazeMap[gridY];
     if (!row) return true;
     let charX = gridX;
     if (charX < 0) charX = COLS - 1;
@@ -148,6 +199,8 @@ export function MazeGame({ module, onComplete }: MazeGameProps) {
   };
 
   const handleAnswer = (isCorrect: boolean) => {
+    if (stateRef.current !== 'playing') return;
+    stateRef.current = 'transition';
     setGameState('transition');
     if (isCorrect) {
       setFeedback({ text: 'Harika! Doğru Noktaya Ulaştın.', type: 'correct' });
@@ -156,10 +209,12 @@ export function MazeGame({ module, onComplete }: MazeGameProps) {
         setCurrentQIdx(prev => {
           const nextIdx = prev + 1;
           if (nextIdx >= questions.length) {
+            stateRef.current = 'victory';
             setGameState('victory');
             return prev;
           }
           resetPositions(nextIdx);
+          stateRef.current = 'playing';
           setGameState('playing');
           return nextIdx;
         });
@@ -171,9 +226,11 @@ export function MazeGame({ module, onComplete }: MazeGameProps) {
         const nextLives = l - 1;
         setTimeout(() => {
           if (nextLives <= 0) {
+            stateRef.current = 'gameover';
             setGameState('gameover');
           } else {
             resetPositions(currentQIdx);
+            stateRef.current = 'playing';
             setGameState('playing');
           }
           setFeedback(null);
@@ -185,15 +242,18 @@ export function MazeGame({ module, onComplete }: MazeGameProps) {
 
   const handleDeath = () => {
     if (stateRef.current !== 'playing') return;
+    stateRef.current = 'transition';
     setGameState('transition');
     setFeedback({ text: 'Yakalandın!', type: 'wrong' });
     setLives(l => {
       const nextLives = l - 1;
       setTimeout(() => {
         if (nextLives <= 0) {
+          stateRef.current = 'gameover';
           setGameState('gameover');
         } else {
           resetPositions(currentQIdx);
+          stateRef.current = 'playing';
           setGameState('playing');
         }
         setFeedback(null);
@@ -203,28 +263,23 @@ export function MazeGame({ module, onComplete }: MazeGameProps) {
   };
 
   const resetPositions = (nextIdx: number) => {
-    playerRef.current = { x: START_POS.x, y: START_POS.y, dir: 'NONE', nextDir: 'NONE', speed: 0.10 }; // Even slower for better control
+    playerRef.current = { x: START_POS.x, y: START_POS.y, dir: 'NONE', nextDir: 'NONE', speed: 0.12 }; // give player 0.12 speed
     
-    // Gradual difficulty increase
-    const count = Math.min(1 + Math.floor(nextIdx / 1.5), ENEMY_STARTS.length);
-    enemiesRef.current = ENEMY_STARTS.slice(0, count).map(s => ({
-      x: s.x,
-      y: s.y,
-      dir: 'NONE',
-      nextDir: 'NONE',
-      speed: 0.06 + (nextIdx * 0.008), // Slower enemies
-      color: s.color,
-      type: s.type
-    }));
+    // Spawn enemies gradually
+    enemiesRef.current = getInitialEnemies(nextIdx);
 
     setPlayerPos({ x: START_POS.x, y: START_POS.y, dir: 'NONE' });
     setEnemiesPos([...enemiesRef.current]);
     // Reset lastTime to current time to avoid huge delta
     lastTimeRef.current = performance.now();
+    spawnTimeRef.current = performance.now();
+    hasPlayerMovedRef.current = false; // Reset move flag
   };
 
   // Main Game Loop
   const lastTimeRef = useRef<number>(0);
+  const spawnTimeRef = useRef<number>(performance.now());
+  const hasPlayerMovedRef = useRef<boolean>(false);
 
   const animate = useCallback((time: number) => {
     if (stateRef.current === 'paused') {
@@ -251,108 +306,111 @@ export function MazeGame({ module, onComplete }: MazeGameProps) {
       // Check Answers
       const q = questions[currentQIdx];
       if (q) {
-        const checkRange = 3.2; // Extra large hitbox for maximum forgiveness
+        const checkRange = 2.0; // Responsive radius for box size
         for (let i = 0; i < q.options.length; i++) {
           const pos = ANSWER_POSITIONS[i % ANSWER_POSITIONS.length];
-          // Precise center-to-center circular check
-          const dx = p.x - pos.x;
-          const dy = p.y - pos.y;
-          const distSq = dx * dx + dy * dy;
-          if (distSq < checkRange * checkRange) {
+          // Box intersection to match exact visual bounds and coordinates
+          const dx = Math.abs(p.x - pos.x);
+          const dy = Math.abs(p.y - pos.y);
+          // Width: 18% of 21 cols = 3.78 cells. Half-width = 1.89
+          // Height: 14% of 13 rows = 1.82 cells. Half-height = 0.91
+          if (dx <= 1.9 && dy <= 1.0) {
             handleAnswer(q.options[i].isCorrect);
-            return;
+            // DO NOT RETURN HERE, let the game loop pause correctly
           }
         }
       }
 
       // Update Enemies
-      enemiesRef.current.forEach(e => {
-        const centerX = Math.round(e.x);
-        const centerY = Math.round(e.y);
-        
-        const currentActualSpeed = e.speed * delta;
-        const threshold = currentActualSpeed * 1.2;
-        const atCenter = Math.abs(e.x - centerX) < threshold && Math.abs(e.y - centerY) < threshold;
+      if (hasPlayerMovedRef.current) {
+        enemiesRef.current.forEach(e => {
+          const centerX = Math.round(e.x);
+          const centerY = Math.round(e.y);
+          
+          const currentActualSpeed = e.speed * delta;
+          const threshold = currentActualSpeed * 1.2;
+          const atCenter = Math.abs(e.x - centerX) < threshold && Math.abs(e.y - centerY) < threshold;
 
-        if (atCenter) {
-          const dirs: Dir[] = ['UP', 'DOWN', 'LEFT', 'RIGHT'];
-          const validDirs = dirs.filter(d => {
-            // Can't reverse direction directly unless it's the only option
-            if (e.dir === 'UP' && d === 'DOWN') return false;
-            if (e.dir === 'DOWN' && d === 'UP') return false;
-            if (e.dir === 'LEFT' && d === 'RIGHT') return false;
-            if (e.dir === 'RIGHT' && d === 'LEFT') return false;
+          if (atCenter) {
+            const dirs: Dir[] = ['UP', 'DOWN', 'LEFT', 'RIGHT'];
+            const validDirs = dirs.filter(d => {
+              // Can't reverse direction directly unless it's the only option
+              if (e.dir === 'UP' && d === 'DOWN') return false;
+              if (e.dir === 'DOWN' && d === 'UP') return false;
+              if (e.dir === 'LEFT' && d === 'RIGHT') return false;
+              if (e.dir === 'RIGHT' && d === 'LEFT') return false;
 
-            if (d === 'UP') return !isWall(centerX, centerY - 1);
-            if (d === 'DOWN') return !isWall(centerX, centerY + 1);
-            if (d === 'LEFT') return !isWall(centerX - 1, centerY);
-            if (d === 'RIGHT') return !isWall(centerX + 1, centerY);
-            return false;
-          });
+              if (d === 'UP') return !isWall(centerX, centerY - 1);
+              if (d === 'DOWN') return !isWall(centerX, centerY + 1);
+              if (d === 'LEFT') return !isWall(centerX - 1, centerY);
+              if (d === 'RIGHT') return !isWall(centerX + 1, centerY);
+              return false;
+            });
 
-          if (validDirs.length > 0) {
-            // Predictive and Personality-based AI
-            let targetX = p.x;
-            let targetY = p.y;
-            
-            // Prediction factor based on level
-            const predictionPower = 2 + (currentQIdx * 0.5);
-
-            if (e.type === 'pinky') {
-              // Targets ahead of player
-              if (p.dir === 'UP') targetY -= predictionPower;
-              else if (p.dir === 'DOWN') targetY += predictionPower;
-              else if (p.dir === 'LEFT') targetX -= predictionPower;
-              else if (p.dir === 'RIGHT') targetX += predictionPower;
-            } else if (e.type === 'inky') {
-              // Strategic: Flanking logic
-              const blinky = enemiesRef.current.find(en => en.type === 'blinky') || e;
-              const vecX = p.x - blinky.x;
-              const vecY = p.y - blinky.y;
-              targetX = p.x + vecX;
-              targetY = p.y + vecY;
-            } else if (e.type === 'clyde') {
-              // Scatter/Attack behavior
-              const dToP = Math.sqrt(Math.pow(e.x - p.x, 2) + Math.pow(e.y - p.y, 2));
-              if (dToP < 4 + (currentQIdx * 0.2)) { 
-                targetX = (e.x > 10) ? 0 : 20; 
-                targetY = (e.y > 6) ? 0 : 12; 
-              }
-            }
-
-            // Pathfinding: Pick direction that reduces distance to target the most
-            // Ties broken in a specific order (Classic Pac-Man style: UP, LEFT, DOWN, RIGHT)
-            let bestDir = validDirs[0];
-            let minDist = Infinity;
-            
-            for (const vd of validDirs) {
-              let tx = centerX, ty = centerY;
-              if (vd === 'UP') ty--;
-              else if (vd === 'DOWN') ty++;
-              else if (vd === 'LEFT') tx--;
-              else if (vd === 'RIGHT') tx++;
+            if (validDirs.length > 0) {
+              // Predictive and Personality-based AI
+              let targetX = p.x;
+              let targetY = p.y;
               
-              const dist = Math.pow(tx - targetX, 2) + Math.pow(ty - targetY, 2);
-              if (dist < minDist) {
-                minDist = dist;
-                bestDir = vd;
-              }
-            }
-            e.dir = bestDir;
-            // No hard centerX/centerY snap here, let updateEntity handle smooth alignment
-          } else {
-            // If no valid moves (stuck), reverse
-            const reverse: Dir = e.dir === 'UP' ? 'DOWN' : e.dir === 'DOWN' ? 'UP' : e.dir === 'LEFT' ? 'RIGHT' : 'LEFT';
-            e.dir = reverse;
-          }
-        }
-        
-        updateEntity(e, false, delta);
+              // Prediction factor based on level
+              const predictionPower = 2 + (currentQIdx * 0.5);
 
-        // Frame-accurate collision
-        const dist = Math.sqrt(Math.pow(e.x - p.x, 2) + Math.pow(e.y - p.y, 2));
-        if (dist < 0.75) handleDeath();
-      });
+              if (e.type === 'pinky') {
+                // Targets ahead of player
+                if (p.dir === 'UP') targetY -= predictionPower;
+                else if (p.dir === 'DOWN') targetY += predictionPower;
+                else if (p.dir === 'LEFT') targetX -= predictionPower;
+                else if (p.dir === 'RIGHT') targetX += predictionPower;
+              } else if (e.type === 'inky') {
+                // Strategic: Flanking logic
+                const blinky = enemiesRef.current.find(en => en.type === 'blinky') || e;
+                const vecX = p.x - blinky.x;
+                const vecY = p.y - blinky.y;
+                targetX = p.x + vecX;
+                targetY = p.y + vecY;
+              } else if (e.type === 'clyde') {
+                // Scatter/Attack behavior
+                const dToP = Math.sqrt(Math.pow(e.x - p.x, 2) + Math.pow(e.y - p.y, 2));
+                if (dToP < 4 + (currentQIdx * 0.2)) { 
+                  targetX = (e.x > 10) ? 0 : 20; 
+                  targetY = (e.y > 6) ? 0 : 12; 
+                }
+              }
+
+              // Pathfinding: Pick direction that reduces distance to target the most
+              // Ties broken in a specific order (Classic Pac-Man style: UP, LEFT, DOWN, RIGHT)
+              let bestDir = validDirs[0];
+              let minDist = Infinity;
+              
+              for (const vd of validDirs) {
+                let tx = centerX, ty = centerY;
+                if (vd === 'UP') ty--;
+                else if (vd === 'DOWN') ty++;
+                else if (vd === 'LEFT') tx--;
+                else if (vd === 'RIGHT') tx++;
+                
+                const dist = Math.pow(tx - targetX, 2) + Math.pow(ty - targetY, 2);
+                if (dist < minDist) {
+                  minDist = dist;
+                  bestDir = vd;
+                }
+              }
+              e.dir = bestDir;
+              // No hard centerX/centerY snap here, let updateEntity handle smooth alignment
+            } else {
+              // If no valid moves (stuck), reverse
+              const reverse: Dir = e.dir === 'UP' ? 'DOWN' : e.dir === 'DOWN' ? 'UP' : e.dir === 'LEFT' ? 'RIGHT' : 'LEFT';
+              e.dir = reverse;
+            }
+          }
+          
+          updateEntity(e, false, delta);
+
+          // Frame-accurate collision
+          const dist = Math.sqrt(Math.pow(e.x - p.x, 2) + Math.pow(e.y - p.y, 2));
+          if (dist < 0.75) handleDeath();
+        });
+      }
 
       setPlayerPos({ x: p.x, y: p.y, dir: p.dir });
       setEnemiesPos([...enemiesRef.current]);
@@ -369,10 +427,10 @@ export function MazeGame({ module, onComplete }: MazeGameProps) {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const p = playerRef.current;
-      if (['ArrowUp', 'w', 'W', '8'].includes(e.key)) { e.preventDefault(); p.nextDir = 'UP'; }
-      if (['ArrowDown', 's', 'S', '2'].includes(e.key)) { e.preventDefault(); p.nextDir = 'DOWN'; }
-      if (['ArrowLeft', 'a', 'A', '4'].includes(e.key)) { e.preventDefault(); p.nextDir = 'LEFT'; }
-      if (['ArrowRight', 'd', 'D', '6'].includes(e.key)) { e.preventDefault(); p.nextDir = 'RIGHT'; }
+      if (['ArrowUp', 'w', 'W', '8'].includes(e.key)) { e.preventDefault(); p.nextDir = 'UP'; hasPlayerMovedRef.current = true; }
+      if (['ArrowDown', 's', 'S', '2'].includes(e.key)) { e.preventDefault(); p.nextDir = 'DOWN'; hasPlayerMovedRef.current = true; }
+      if (['ArrowLeft', 'a', 'A', '4'].includes(e.key)) { e.preventDefault(); p.nextDir = 'LEFT'; hasPlayerMovedRef.current = true; }
+      if (['ArrowRight', 'd', 'D', '6'].includes(e.key)) { e.preventDefault(); p.nextDir = 'RIGHT'; hasPlayerMovedRef.current = true; }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
@@ -383,6 +441,7 @@ export function MazeGame({ module, onComplete }: MazeGameProps) {
     setLives(3);
     setScore(0);
     resetPositions(0);
+    stateRef.current = 'playing';
     setGameState('playing');
   };
 
@@ -414,7 +473,7 @@ export function MazeGame({ module, onComplete }: MazeGameProps) {
             gridTemplateColumns: `repeat(${COLS}, 1fr)`,
             gridTemplateRows: `repeat(${ROWS}, 1fr)` 
           }}>
-            {MAZE_GRID.map((row, y) => 
+            {currentMazeMap.map((row, y) => 
               row.split('').map((cell, x) => (
                 <div 
                   key={`${x}-${y}`} 
@@ -435,24 +494,31 @@ export function MazeGame({ module, onComplete }: MazeGameProps) {
              const pos = ANSWER_POSITIONS[i % ANSWER_POSITIONS.length];
              if (!pos) return null;
              return (
-               <motion.div 
-                 key={i} 
-                 initial={{ opacity: 0, scale: 0.8 }}
-                 animate={{ opacity: 1, scale: 1 }}
-                 className="absolute z-20 flex items-center justify-center pointer-events-none"
+               <div 
+                 key={`wrapper-${i}`}
+                 className="absolute pointer-events-none"
                  style={{
                    left: `${((pos.x + 0.5) / COLS) * 100}%`,
                    top: `${((pos.y + 0.5) / ROWS) * 100}%`,
-                   width: '20%', 
-                   height: '18%', 
+                   width: '18%', 
+                   height: '14%', 
                    transform: 'translate(-50%, -50%)',
                    zIndex: 40
                  }}
                >
-                 <div className="w-full h-full border-2 border-emerald-400/50 bg-emerald-950/95 backdrop-blur-xl rounded-2xl p-3 flex items-center justify-center text-xs md:text-sm lg:text-base text-center font-bold text-emerald-50 text-shadow-glow shadow-[0_0_50px_rgba(52,211,153,0.5)]">
-                   {opt.text}
-                 </div>
-               </motion.div>
+                 <motion.div 
+                   initial={{ opacity: 0, scale: 0.8 }}
+                   animate={{ opacity: 1, scale: 1 }}
+                   className="w-full h-full flex flex-col items-center justify-center p-1 relative"
+                 >
+                   {/* Core glowing dot for exact hitbox reference */}
+                   <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-emerald-300 rounded-full blur-[2px] animate-pulse" />
+                   
+                   <div className="w-full h-full border-2 border-emerald-400/50 bg-emerald-950/80 backdrop-blur-md rounded-2xl p-2 flex items-center justify-center text-[10px] md:text-sm lg:text-base text-center font-bold text-emerald-50 shadow-[0_0_50px_rgba(52,211,153,0.3)] z-10">
+                     {opt.text}
+                   </div>
+                 </motion.div>
+               </div>
              )
           })}
 

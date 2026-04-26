@@ -52,7 +52,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const docSnap = await getDoc(docRef);
           
           if (docSnap.exists()) {
-            setUserProfile(docSnap.data() as UserProfile);
+            const data = docSnap.data();
+            setUserProfile({
+              ...fallbackProfile,
+              ...data,
+              completedModules: data.completedModules || [],
+              badges: data.badges || [],
+              highScores: data.highScores || {}
+            } as UserProfile);
           } else {
             // Create new user profile
             await setDoc(docRef, fallbackProfile);
